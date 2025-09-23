@@ -1,9 +1,7 @@
-@layer utilities {
-  .pin {
-    @apply inset-0;
-  }
+@utility pin {
+  @apply inset-0;
+}
 
-  .pin-x {
-    @apply inset-x-0;
-  }
+@utility pin-x {
+  @apply inset-x-0;
 }

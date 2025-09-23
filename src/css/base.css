@@ -4,19 +4,19 @@
   }
 
   h1 {
-    font-size: theme('fontSize.5xl');
-    font-weight: theme('fontWeight.bold');
+    font-size: var(--text-5xl);
+    font-weight: var(--font-weight-bold);
   }
   h2 {
-    font-size: theme('fontSize.4xl');
-    font-weight: theme('fontWeight.bold');
+    font-size: var(--text-4xl);
+    font-weight: var(--font-weight-bold);
   }
   h3 {
-    font-size: theme('fontSize.2xl');
-    font-weight: theme('fontWeight.bold');
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-bold);
   }
   a {
-    color: theme('colors.cloud-burst.500');
-    font-weight: theme('fontWeight.bold');
+    color: var(--color-cloud-burst-500);
+    font-weight: var(--font-weight-bold);
   }
 }

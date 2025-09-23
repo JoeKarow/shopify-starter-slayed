@@ -5,7 +5,7 @@
  * default: https://github.com/tailwindcss/tailwindcss/blob/master/stubs/defaultConfig.stub.js
  */
 const path = require('path')
-let plugin = require('tailwindcss/plugin')
+let plugin = require('tailwindcss/plugin.js')
 
 module.exports = {
   content: [
@@ -100,7 +100,6 @@ module.exports = {
     },
   },
   plugins: [
-    require('@tailwindcss/container-queries'),
     require('@tailwindcss/typography')(),
     plugin(function ({ addVariant }) {
       addVariant('scrolled', '.scrolled &'),
