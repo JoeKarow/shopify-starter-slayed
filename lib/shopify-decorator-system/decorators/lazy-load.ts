@@ -1,109 +1,86 @@
 /**
  * @LazyLoad Decorator
  *
- * Defers component loading until needed using Intersection Observer
+ * Enables viewport-based lazy loading for components using IntersectionObserver
  */
 
-import { registerComponent } from '../registry.js'
-import type { DecoratorOptions, LoadingStrategy } from '../types.js'
+import 'reflect-metadata'
+import { ComponentRegistry } from '../registry.js'
+
+export interface LazyLoadDecoratorOptions {
+  rootMargin?: string     // Default: '100vh'
+  threshold?: number      // Default: 0.1
+  placeholder?: string    // Optional placeholder component
+}
 
 /**
- * Lazy loading decorator using Intersection Observer
- *
- * @param options - Lazy loading configuration
+ * LazyLoad decorator - enables viewport-based lazy loading
+ * Cannot be used with @Critical decorator
  */
-export function LazyLoad(options: DecoratorOptions = {}): ClassDecorator {
+export function LazyLoad(options: LazyLoadDecoratorOptions = {}): ClassDecorator {
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    const loadingStrategy: LoadingStrategy = {
-      type: 'lazy',
-      options: {
+    const registry = ComponentRegistry.getInstance()
+
+    // Check for conflicting @Critical decorator
+    const existingDecorators = Reflect.getMetadata('shopify:decorators', constructor) || []
+    const hasCritical = existingDecorators.some((d: any) => d.type === 'Critical')
+
+    if (hasCritical) {
+      console.warn(
+        `Component ${constructor.name} has both @LazyLoad and @Critical decorators. ` +
+        `@Critical takes precedence - component will load immediately.`
+      )
+      return constructor
+    }
+
+    // Validate threshold range
+    if (options.threshold !== undefined && (options.threshold < 0 || options.threshold > 1)) {
+      console.warn(
+        `Component ${constructor.name} has invalid threshold ${options.threshold}. ` +
+        `Using default 0.1. Threshold must be between 0 and 1.`
+      )
+      options.threshold = 0.1
+    }
+
+    // Get current file path for debugging
+    const filePath = getComponentFilePath(constructor)
+
+    const decoratorMeta = {
+      type: 'LazyLoad' as const,
+      parameters: {
         rootMargin: options.rootMargin || '100vh',
         threshold: options.threshold || 0.1,
-        timeout: options.timeout || 5000,
-      },
+        ...(options.placeholder && { placeholder: options.placeholder })
+      }
     }
 
-    registerComponent({
-      name: constructor.name,
-      constructor,
-      lazy: true,
-      loadingStrategy,
-    })
+    const metadata = {
+      className: constructor.name,
+      filePath,
+      decorators: [decoratorMeta],
+      instance: new constructor()
+    }
+
+    registry.register(metadata)
+
+    // Store decorator metadata
+    Reflect.defineMetadata('shopify:decorators', [decoratorMeta], constructor)
+    Reflect.defineMetadata('shopify:lazy-load', true, constructor)
 
     return constructor
   }
 }
 
 /**
- * Load on idle (using requestIdleCallback)
+ * Get component file path for debugging
  */
-export function LoadOnIdle(options: DecoratorOptions = {}): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    const loadingStrategy: LoadingStrategy = {
-      type: 'idle',
-      options: {
-        timeout: options.timeout || 5000,
-      },
+function getComponentFilePath(constructor: any): string {
+  const stack = new Error().stack
+  if (stack) {
+    const match = stack.match(/at.*\(([^)]+)\)/)
+    if (match && match[1]) {
+      return match[1].split('?')[0]
     }
-
-    registerComponent({
-      name: constructor.name,
-      constructor,
-      lazy: true,
-      loadingStrategy,
-    })
-
-    return constructor
   }
-}
-
-/**
- * Load on user interaction
- */
-export function LoadOnInteraction(
-  events: string[] = ['click', 'touchstart', 'keydown'],
-  options: DecoratorOptions = {}
-): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    const loadingStrategy: LoadingStrategy = {
-      type: 'interaction',
-      options: {
-        events,
-        timeout: options.timeout || 10000,
-      },
-    }
-
-    registerComponent({
-      name: constructor.name,
-      constructor,
-      lazy: true,
-      loadingStrategy,
-    })
-
-    return constructor
-  }
-}
-
-/**
- * Load when element enters viewport
- */
-export function LoadOnViewport(options: DecoratorOptions = {}): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    const loadingStrategy: LoadingStrategy = {
-      type: 'viewport',
-      options: {
-        rootMargin: options.rootMargin || '50px',
-        threshold: options.threshold || 0.1,
-      },
-    }
-
-    registerComponent({
-      name: constructor.name,
-      constructor,
-      lazy: true,
-      loadingStrategy,
-    })
-
-    return constructor
-  }
+  return `unknown/${constructor.name}.ts`
 }
