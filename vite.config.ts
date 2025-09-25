@@ -17,6 +17,7 @@ import liquidSnippets from './lib/vite-plugin-liquid-snippets/index.js'
 import fs from 'fs'
 import { promises as fsPromises } from 'fs'
 import path from 'path'
+import { fileURLToPath, URL } from 'node:url'
 import chokidar from 'chokidar'
 
 function copyFile(src: string, dest: string): void {
@@ -110,6 +111,16 @@ function getCacheHeaders(fileName: string): string {
 
 export default defineConfig({
   clearScreen: false,
+  resolve: {
+    alias: {
+      '@lib': new URL('lib', import.meta.url).pathname,
+      '@frontend': new URL('frontend', import.meta.url).pathname,
+      '@components': new URL('frontend/components', import.meta.url).pathname,
+      '@decorators': new URL('frontend/decorators', import.meta.url).pathname,
+      '@': new URL('src', import.meta.url).pathname,
+      '~': new URL('src', import.meta.url).pathname,
+    },
+  },
   server: {
     host: '127.0.0.1',
     https: {},
@@ -147,15 +158,15 @@ export default defineConfig({
           if (isDev) {
             return '[name].js'
           }
-          // Production: use contenthash for better cache busting
-          return 'assets/[name].[contenthash:8].min.js'
+          // Production: use hash for better cache busting
+          return 'assets/[name].[hash].min.js'
         },
         chunkFileNames: (_chunkInfo) => {
           const isDev = process.env.NODE_ENV === 'development'
           if (isDev) {
             return '[name]-chunk.js'
           }
-          return 'assets/[name]-[contenthash:8].min.js'
+          return 'assets/[name]-[hash].min.js'
         },
         assetFileNames: (assetInfo) => {
           const isDev = process.env.NODE_ENV === 'development'
@@ -173,33 +184,37 @@ export default defineConfig({
 
           // CSS files
           if (extType === 'css') {
-            return 'assets/css/[name].[contenthash:8].min[extname]'
+            return 'assets/css/[name].[hash].min[extname]'
           }
 
           // Image files
           if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'avif'].includes(extType || '')) {
-            return 'assets/images/[name].[contenthash:8][extname]'
+            return 'assets/images/[name].[hash][extname]'
           }
 
           // Font files
           if (['woff', 'woff2', 'ttf', 'otf', 'eot'].includes(extType || '')) {
-            return 'assets/fonts/[name].[contenthash:8][extname]'
+            return 'assets/fonts/[name].[hash][extname]'
           }
 
           // Other assets
-          return 'assets/misc/[name].[contenthash:8][extname]'
+          return 'assets/misc/[name].[hash][extname]'
         },
         // Source maps with content hashing
-        sourcemapFileNames: process.env.NODE_ENV === 'development' ? '[name].js.map' : 'assets/maps/[name].[contenthash:8].js.map',
+        sourcemapFileNames: process.env.NODE_ENV === 'development' ? '[name].js.map' : 'assets/maps/[name].[hash].js.map',
         // Ensure deterministic builds for better caching
         generatedCode: {
           constBindings: true,
         },
         // Optimize chunk splitting for better caching
-        manualChunks: {
-          // Vendor chunks for better long-term caching
-          'vendor-alpine': ['alpinejs'],
-          'vendor-utils': ['@lib/shopify-decorator-system'],
+        manualChunks: (id) => {
+          // Only create chunks for dependencies that actually exist
+          if (id.includes('node_modules')) {
+            if (id.includes('alpinejs')) {
+              return 'vendor-alpine'
+            }
+          }
+          return undefined
         },
       },
       // Enable advanced optimizations
@@ -230,39 +245,28 @@ export default defineConfig({
             'ExcludeTemplate',
             'GlobalTemplate',
             'LazyLoad',
-            'LoadOnIdle',
-            'LoadOnInteraction',
-            'LoadOnViewport',
             'Critical',
-            'AboveTheFold',
-            'InlineCritical',
             'NetworkAware',
-            'FastConnectionOnly',
-            'RespectSaveData',
-            'Conditional',
-            'MediaQuery',
-            'FeatureDetection',
-            'TouchOnly',
-            'DesktopOnly',
-            'MinWidth',
-            'MaxWidth',
-            'Debounce',
+            'Debounced',
+            'DebounceQuick',
             'DebounceLeading',
-            'DebounceTrailing',
+            'DebounceBoth',
+            'Cached',
+            'CacheLong',
+            'CacheShort',
+            'CacheWithKey',
+            // Legacy compatibility exports
+            'Debounce',
             'Throttle',
-            'ThrottleLeading',
-            'ThrottleTrailing',
             'Memoize',
-            'MemoizeTTL',
+            'Conditional',
           ],
         },
         // Import registry functions
         {
           '@lib/shopify-decorator-system/registry': [
-            'registerComponent',
-            'getComponent',
-            'getComponentsByTemplate',
-            'initializeComponents',
+            'registry',
+            'ComponentRegistry',
           ],
         },
       ],

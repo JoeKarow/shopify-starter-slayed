@@ -7,11 +7,19 @@
 export {}
 declare global {
   const AboveTheFold: typeof import('@lib/shopify-decorator-system')['AboveTheFold']
+  const CacheLong: typeof import('@lib/shopify-decorator-system')['CacheLong']
+  const CacheShort: typeof import('@lib/shopify-decorator-system')['CacheShort']
+  const CacheWithKey: typeof import('@lib/shopify-decorator-system')['CacheWithKey']
+  const Cached: typeof import('@lib/shopify-decorator-system')['Cached']
+  const ComponentRegistry: typeof import('@lib/shopify-decorator-system/registry')['ComponentRegistry']
   const Conditional: typeof import('@lib/shopify-decorator-system')['Conditional']
   const Critical: typeof import('@lib/shopify-decorator-system')['Critical']
   const Debounce: typeof import('@lib/shopify-decorator-system')['Debounce']
+  const DebounceBoth: typeof import('@lib/shopify-decorator-system')['DebounceBoth']
   const DebounceLeading: typeof import('@lib/shopify-decorator-system')['DebounceLeading']
+  const DebounceQuick: typeof import('@lib/shopify-decorator-system')['DebounceQuick']
   const DebounceTrailing: typeof import('@lib/shopify-decorator-system')['DebounceTrailing']
+  const Debounced: typeof import('@lib/shopify-decorator-system')['Debounced']
   const DesktopOnly: typeof import('@lib/shopify-decorator-system')['DesktopOnly']
   const ExcludeTemplate: typeof import('@lib/shopify-decorator-system')['ExcludeTemplate']
   const FastConnectionOnly: typeof import('@lib/shopify-decorator-system')['FastConnectionOnly']
@@ -41,5 +49,6 @@ declare global {
   const global: typeof import('./src/js/alpine/stores/global.js')['default']
   const initializeComponents: typeof import('@lib/shopify-decorator-system/registry')['initializeComponents']
   const registerComponent: typeof import('@lib/shopify-decorator-system/registry')['registerComponent']
+  const registry: typeof import('@lib/shopify-decorator-system/registry')['registry']
   const testDirective: typeof import('./src/js/alpine/directives/testDirective.js')['default']
 }

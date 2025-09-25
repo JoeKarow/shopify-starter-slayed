@@ -14,7 +14,7 @@ export async function discoverComponents(): Promise<ComponentMetadata[]> {
 
   try {
     // Use Vite's glob import feature to dynamically import all component files
-    const modules = import.meta.glob('/frontend/components/**/*.{ts,js}', {
+    const modules = import.meta.glob('../../frontend/components/**/*.{ts,js}', {
       eager: false,
       import: 'default'
     })
@@ -33,18 +33,13 @@ export async function discoverComponents(): Promise<ComponentMetadata[]> {
       }
     }
 
-    // Also check for components in lib directory
-    const libModules = import.meta.glob('/lib/**/*.{ts,js}', {
+    // Also check for components in src directory (Alpine.js components)
+    const srcModules = import.meta.glob('../../src/js/alpine/components/**/*.{ts,js}', {
       eager: false,
       import: 'default'
     })
 
-    for (const [path, importFn] of Object.entries(libModules)) {
-      // Skip non-component files
-      if (!path.includes('component') && !path.includes('Component')) {
-        continue
-      }
-
+    for (const [path, importFn] of Object.entries(srcModules)) {
       try {
         const moduleDefault = await (importFn as () => Promise<any>)()
         const metadata = extractComponentMetadata(moduleDefault, path)
@@ -103,31 +98,15 @@ function cleanFilePath(path: string): string {
  * Discover components in a specific directory
  */
 export async function discoverComponentsInDir(directory: string): Promise<ComponentMetadata[]> {
-  const pattern = `/${directory}/**/*.{ts,js}`
-
   try {
-    // Create dynamic glob pattern
-    const modules = import.meta.glob(pattern, {
-      eager: false,
-      import: 'default'
-    })
+    // For now, just return components from the main discovery
+    // This is a simplified implementation to avoid dynamic glob patterns
+    const allComponents = await discoverComponents()
 
-    const components: ComponentMetadata[] = []
-
-    for (const [path, importFn] of Object.entries(modules)) {
-      try {
-        const moduleDefault = await (importFn as () => Promise<any>)()
-        const metadata = extractComponentMetadata(moduleDefault, path)
-
-        if (metadata) {
-          components.push(metadata)
-        }
-      } catch (error) {
-        console.warn(`Failed to import component from ${path}:`, error)
-      }
-    }
-
-    return components
+    // Filter components that match the directory pattern
+    return allComponents.filter(component =>
+      component.filePath.includes(directory)
+    )
   } catch (error) {
     console.error(`Failed to discover components in ${directory}:`, error)
     return []
@@ -169,26 +148,10 @@ export async function discoverAndRegister(): Promise<ComponentMetadata[]> {
  */
 async function findConstructorByName(className: string, filePath: string): Promise<any> {
   try {
-    // Try to re-import the module and find the constructor
-    const module = await import(`/${filePath}`)
-
-    // Check default export
-    if (module.default && module.default.name === className) {
-      return module.default
-    }
-
-    // Check named exports
-    if (module[className]) {
-      return module[className]
-    }
-
-    // Check all exports for matching class name
-    for (const [_key, value] of Object.entries(module)) {
-      if (typeof value === 'function' && value.name === className) {
-        return value
-      }
-    }
-
+    // Simplified approach: just return null for now
+    // In a real implementation, we'd need to store constructor references
+    // during the initial glob import phase
+    console.warn(`Constructor lookup for ${className} not implemented in build mode`)
     return null
   } catch (error) {
     console.warn(`Could not find constructor ${className} in ${filePath}:`, error)
