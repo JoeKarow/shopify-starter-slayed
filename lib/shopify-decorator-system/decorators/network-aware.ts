@@ -1,139 +1,115 @@
 /**
  * @NetworkAware Decorator
  *
- * Adapts component loading based on network conditions
+ * Adapts component loading based on network speed and conditions
  */
 
-import { registerComponent } from '../registry.js'
-import type { DecoratorOptions, NetworkCondition } from '../types.js'
+import 'reflect-metadata'
+import { ComponentRegistry } from '../registry.js'
+
+export interface NetworkAwareDecoratorOptions {
+  slowThreshold?: number      // Mbps, default: 10
+  fallbackStrategy?: 'defer' | 'simplify' | 'critical-only'
+  reduceQuality?: boolean     // Reduce asset quality on slow networks
+}
 
 /**
- * Network-aware component loading decorator
- *
- * @param options - Network condition options
+ * NetworkAware decorator - adapts loading based on network speed
  */
-export function NetworkAware(options: DecoratorOptions = {}): ClassDecorator {
+export function NetworkAware(options: NetworkAwareDecoratorOptions = {}): ClassDecorator {
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    const networkCondition: NetworkCondition = {
-      slowThreshold: options.slowThreshold || 200,
-      saveData: options.saveData !== false, // Default to true
+    const registry = ComponentRegistry.getInstance()
+
+    // Validate slowThreshold
+    if (options.slowThreshold !== undefined && options.slowThreshold < 0) {
+      console.warn(
+        `Component ${constructor.name} has invalid slowThreshold ${options.slowThreshold}. ` +
+        `Using default 10 Mbps. Threshold must be positive.`
+      )
+      options.slowThreshold = 10
     }
 
-    registerComponent({
-      name: constructor.name,
-      constructor,
-      networkAware: true,
-      conditions: [{
-        type: 'network',
-        config: networkCondition,
-      }],
-      loadingStrategy: getNetworkAwareStrategy(networkCondition),
-    })
+    // Get current file path for debugging
+    const filePath = getComponentFilePath(constructor)
+
+    const decoratorMeta = {
+      type: 'NetworkAware' as const,
+      parameters: {
+        slowThreshold: options.slowThreshold || 10, // Mbps
+        fallbackStrategy: options.fallbackStrategy || 'defer',
+        reduceQuality: options.reduceQuality || false
+      }
+    }
+
+    const metadata = {
+      className: constructor.name,
+      filePath,
+      decorators: [decoratorMeta],
+      instance: new constructor()
+    }
+
+    registry.register(metadata)
+
+    // Store decorator metadata
+    Reflect.defineMetadata('shopify:decorators', [decoratorMeta], constructor)
+    Reflect.defineMetadata('shopify:network-aware', true, constructor)
 
     return constructor
   }
 }
 
 /**
- * Load only on fast connections
+ * Get component file path for debugging
  */
-export function FastConnectionOnly(options: DecoratorOptions = {}): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    const networkCondition: NetworkCondition = {
-      fastThreshold: options.slowThreshold || 100,
-      effectiveType: '4g',
+function getComponentFilePath(constructor: any): string {
+  const stack = new Error().stack
+  if (stack) {
+    const match = stack.match(/at.*\(([^)]+)\)/)
+    if (match && match[1]) {
+      return match[1].split('?')[0]
     }
-
-    registerComponent({
-      name: constructor.name,
-      constructor,
-      networkAware: true,
-      conditions: [{
-        type: 'network',
-        config: networkCondition,
-      }],
-      loadingStrategy: {
-        type: 'lazy',
-        options: { timeout: options.timeout || 10000 },
-      },
-    })
-
-    return constructor
   }
+  return `unknown/${constructor.name}.ts`
 }
 
 /**
- * Respect save-data preference
+ * Get current network speed estimate in Mbps using Network Information API
  */
-export function RespectSaveData(options: DecoratorOptions = {}): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    const networkCondition: NetworkCondition = {
-      saveData: true,
-    }
-
-    // Check if save-data is enabled
-    const saveDataEnabled = typeof navigator !== 'undefined' &&
-      'connection' in navigator &&
-      (navigator as any).connection?.saveData
-
-    registerComponent({
-      name: constructor.name,
-      constructor,
-      networkAware: true,
-      conditions: [{
-        type: 'network',
-        config: networkCondition,
-      }],
-      loadingStrategy: saveDataEnabled ? {
-        type: 'interaction', // Only load on user interaction if save-data is on
-      } : {
-        type: 'lazy',
-      },
-    })
-
-    return constructor
-  }
-}
-
-/**
- * Determine loading strategy based on network conditions
- */
-function getNetworkAwareStrategy(condition: NetworkCondition) {
-  if (typeof navigator === 'undefined') {
-    return { type: 'lazy' as const }
+export function getNetworkSpeed(): number {
+  if (typeof navigator === 'undefined' || !('connection' in navigator)) {
+    return 10 // Default assumption: 10 Mbps
   }
 
   const connection = (navigator as any).connection
   if (!connection) {
-    return { type: 'lazy' as const }
+    return 10
   }
 
-  // Check save-data preference
-  if (condition.saveData && connection.saveData) {
-    return { type: 'interaction' as const }
+  // Use downlink if available (this is in Mbps)
+  if (connection.downlink) {
+    return connection.downlink
   }
 
-  // Check connection speed
-  const rtt = connection.rtt || 0
-  if (condition.slowThreshold && rtt > condition.slowThreshold) {
-    return { type: 'interaction' as const }
+  // Fallback to effective type estimates
+  const effectiveType = connection.effectiveType
+  const speedEstimates = {
+    'slow-2g': 0.1,
+    '2g': 0.25,
+    '3g': 1.5,
+    '4g': 10
   }
 
-  if (condition.fastThreshold && rtt < condition.fastThreshold) {
-    return { type: 'eager' as const }
+  return speedEstimates[effectiveType as keyof typeof speedEstimates] || 10
+}
+
+/**
+ * Check if user has save-data preference enabled
+ */
+export function isSaveDataEnabled(): boolean {
+  if (typeof navigator === 'undefined' || !('connection' in navigator)) {
+    return false
   }
 
-  // Check effective type
-  if (condition.effectiveType) {
-    const effectiveType = connection.effectiveType
-    const typeOrder = { '2g': 0, '3g': 1, '4g': 2 }
-    const requiredOrder = typeOrder[condition.effectiveType]
-    const currentOrder = typeOrder[effectiveType] ?? -1
-
-    if (currentOrder < requiredOrder) {
-      return { type: 'interaction' as const }
-    }
-  }
-
-  return { type: 'lazy' as const }
+  const connection = (navigator as any).connection
+  return connection?.saveData === true
 }
