@@ -4,42 +4,80 @@
  * Loads components only on specific Shopify templates
  */
 
-import { registerComponent } from '../registry.js'
-import type { DecoratorOptions } from '../types.js'
+import 'reflect-metadata'
+import { ComponentRegistry } from '../registry.js'
+
+export interface TemplateDecoratorOptions {
+  templates: string[] | '*'  // '*' for all templates
+}
 
 /**
  * Template-specific component loading decorator
  *
- * @param templates - Array of template names or single template name
- * @param options - Additional decorator options
+ * @param options - Array of template names or TemplateDecoratorOptions object
  */
 export function Template(
-  templates: string | string[],
-  options: DecoratorOptions = {}
+  options: string[] | TemplateDecoratorOptions
 ): ClassDecorator {
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    const templateNames = Array.isArray(templates) ? templates : [templates]
+    const registry = ComponentRegistry.getInstance()
 
-    registerComponent({
-      name: constructor.name,
-      constructor,
-      templates: templateNames,
-      critical: false,
-      loadingStrategy: {
-        type: 'eager',
-      },
-    })
+    // Handle both array and object parameter formats
+    const templates = Array.isArray(options)
+      ? options
+      : options.templates === '*'
+        ? ['*']
+        : Array.isArray(options.templates)
+          ? options.templates
+          : [options.templates as string]
+
+    // Get current file path for debugging (will be enhanced by auto-discovery)
+    const filePath = getComponentFilePath(constructor)
+
+    const metadata = {
+      className: constructor.name,
+      filePath,
+      decorators: [
+        {
+          type: 'Template' as const,
+          parameters: Array.isArray(options) ? options : options
+        }
+      ],
+      instance: new constructor()
+    }
+
+    registry.register(metadata)
+
+    // Store template mapping for fast lookup
+    Reflect.defineMetadata('shopify:templates', templates, constructor)
+    Reflect.defineMetadata('shopify:decorators', metadata.decorators, constructor)
 
     return constructor
   }
 }
 
 /**
+ * Get component file path for debugging
+ * This is a placeholder - will be enhanced by the auto-discovery system
+ */
+function getComponentFilePath(constructor: any): string {
+  // Try to extract from stack trace
+  const stack = new Error().stack
+  if (stack) {
+    const match = stack.match(/at.*\(([^)]+)\)/)
+    if (match && match[1]) {
+      return match[1].split('?')[0] // Remove query params
+    }
+  }
+
+  return `unknown/${constructor.name}.ts`
+}
+
+/**
  * Exclude from specific templates
  */
 export function ExcludeTemplate(
-  templates: string | string[],
-  options: DecoratorOptions = {}
+  templates: string | string[]
 ): ClassDecorator {
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
     const excludeNames = Array.isArray(templates) ? templates : [templates]
@@ -53,35 +91,13 @@ export function ExcludeTemplate(
 
     const includeTemplates = allTemplates.filter(t => !excludeNames.includes(t))
 
-    registerComponent({
-      name: constructor.name,
-      constructor,
-      templates: includeTemplates,
-      critical: false,
-      loadingStrategy: {
-        type: 'eager',
-      },
-    })
-
-    return constructor
+    return Template(includeTemplates)(constructor)
   }
 }
 
 /**
  * Load on all templates (global component)
  */
-export function GlobalTemplate(options: DecoratorOptions = {}): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    registerComponent({
-      name: constructor.name,
-      constructor,
-      templates: ['*'], // Wildcard for all templates
-      critical: options.priority ? options.priority > 0 : false,
-      loadingStrategy: {
-        type: 'eager',
-      },
-    })
-
-    return constructor
-  }
+export function GlobalTemplate(): ClassDecorator {
+  return Template(['*'])
 }

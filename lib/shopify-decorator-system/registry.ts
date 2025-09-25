@@ -4,7 +4,43 @@
  * Central registry for managing decorated components and their metadata
  */
 
-import type { ComponentMetadata, LoadingStrategy, PerformanceMetrics } from './types.js'
+import 'reflect-metadata'
+
+// Contract-based interfaces
+export interface ComponentMetadata {
+  className: string
+  filePath: string
+  decorators: DecoratorMetadata[]
+  instance?: any
+}
+
+export interface DecoratorMetadata {
+  type: 'Template' | 'LazyLoad' | 'Critical' | 'NetworkAware'
+  parameters: any
+}
+
+export interface LoadingStrategy {
+  trigger: 'immediate' | 'viewport' | 'interaction' | 'idle'
+  priority: number  // Lower = higher priority
+  conditions?: {
+    viewport?: {
+      rootMargin: string
+      threshold: number
+    }
+    network?: {
+      minSpeed: number
+    }
+  }
+  fallback?: LoadingStrategy
+}
+
+export interface PerformanceMetrics {
+  componentsLoaded: number
+  totalLoadTime: number
+  cacheHits: number
+  networkRequests: number
+  bytesTransferred: number
+}
 
 export class ComponentRegistry {
   private static instance: ComponentRegistry
@@ -26,15 +62,18 @@ export class ComponentRegistry {
   }
 
   /**
-   * Register a component with metadata
+   * Register a component with its decorators
    */
-  register(metadata: ComponentMetadata): void {
-    this.components.set(metadata.name, metadata)
+  register(component: ComponentMetadata): void {
+    this.components.set(component.className, component)
 
-    if (metadata.critical) {
-      // Load critical components immediately
-      this.loadComponent(metadata.name).catch(error => {
-        console.error(`Failed to load critical component ${metadata.name}:`, error)
+    // Check if component is critical and should load immediately
+    const criticalDecorator = component.decorators.find(d => d.type === 'Critical')
+    if (criticalDecorator) {
+      this.initializeComponent(component, this.getLoadingStrategy(component, {
+        template: 'unknown'
+      })).catch(error => {
+        console.error(`Failed to load critical component ${component.className}:`, error)
       })
     }
   }
@@ -49,34 +88,107 @@ export class ComponentRegistry {
   /**
    * Get all components for a specific template
    */
-  getByTemplate(template: string): ComponentMetadata[] {
-    return Array.from(this.components.values()).filter(component =>
-      component.templates?.includes(template) ||
-      component.templates?.includes('*') ||
-      !component.templates // Global components
-    )
+  getComponentsForTemplate(template: string): ComponentMetadata[] {
+    return Array.from(this.components.values()).filter(component => {
+      const templateDecorator = component.decorators.find(d => d.type === 'Template')
+      if (!templateDecorator) return false
+
+      const templates = Array.isArray(templateDecorator.parameters)
+        ? templateDecorator.parameters
+        : templateDecorator.parameters.templates === '*'
+          ? ['*']
+          : Array.isArray(templateDecorator.parameters.templates)
+            ? templateDecorator.parameters.templates
+            : [templateDecorator.parameters.templates]
+
+      return templates.includes(template) || templates.includes('*')
+    })
   }
 
   /**
-   * Load component instance
+   * Get loading strategy for a component
    */
-  async loadComponent(name: string): Promise<any> {
-    const startTime = performance.now()
-    const metadata = this.components.get(name)
+  getLoadingStrategy(component: ComponentMetadata, context: {
+    template: string
+    network?: 'slow' | 'fast'
+    viewport?: DOMRect
+  }): LoadingStrategy {
+    const criticalDecorator = component.decorators.find(d => d.type === 'Critical')
+    const lazyDecorator = component.decorators.find(d => d.type === 'LazyLoad')
+    const networkDecorator = component.decorators.find(d => d.type === 'NetworkAware')
 
-    if (!metadata) {
-      throw new Error(`Component ${name} not found in registry`)
+    // Critical components load immediately
+    if (criticalDecorator) {
+      return {
+        trigger: 'immediate',
+        priority: 1
+      }
     }
 
-    if (this.loadedComponents.has(name)) {
+    // Lazy load components wait for viewport intersection
+    if (lazyDecorator) {
+      const options = lazyDecorator.parameters || {}
+      return {
+        trigger: 'viewport',
+        priority: 10,
+        conditions: {
+          viewport: {
+            rootMargin: options.rootMargin || '100vh',
+            threshold: options.threshold || 0.1
+          }
+        }
+      }
+    }
+
+    // Network aware components adapt to connection speed
+    if (networkDecorator && context.network === 'slow') {
+      const options = networkDecorator.parameters || {}
+      const fallbackStrategy = options.fallbackStrategy || 'defer'
+
+      switch (fallbackStrategy) {
+        case 'defer':
+          return {
+            trigger: 'idle',
+            priority: 20
+          }
+        case 'critical-only':
+          return {
+            trigger: 'interaction',
+            priority: 30
+          }
+        default:
+          return {
+            trigger: 'immediate',
+            priority: 15
+          }
+      }
+    }
+
+    // Default strategy
+    return {
+      trigger: 'immediate',
+      priority: 5
+    }
+  }
+
+  /**
+   * Initialize component based on strategy
+   */
+  async initializeComponent(component: ComponentMetadata, strategy: LoadingStrategy): Promise<void> {
+    const startTime = performance.now()
+
+    if (this.loadedComponents.has(component.className)) {
       this.performanceMetrics.cacheHits++
-      return metadata.constructor
+      return
     }
 
     try {
-      // Initialize component
-      const instance = new metadata.constructor()
-      this.loadedComponents.add(name)
+      // Component already has instance created during decoration
+      if (!component.instance) {
+        throw new Error(`Component ${component.className} has no instance`)
+      }
+
+      this.loadedComponents.add(component.className)
 
       // Update performance metrics
       const loadTime = performance.now() - startTime
@@ -87,33 +199,42 @@ export class ComponentRegistry {
       if (typeof window !== 'undefined' && window.dispatchEvent) {
         window.dispatchEvent(new CustomEvent('component:loaded', {
           detail: {
-            name,
+            className: component.className,
             loadTime,
-            strategy: metadata.loadingStrategy?.type || 'eager',
+            strategy: strategy.trigger,
             fromCache: false,
           }
         }))
       }
-
-      return instance
     } catch (error) {
-      console.error(`Failed to load component ${name}:`, error)
+      console.error(`Failed to initialize component ${component.className}:`, error)
       throw error
     }
+  }
+
+  /**
+   * Auto-discover all decorated components in the codebase
+   */
+  async discoverComponents(): Promise<ComponentMetadata[]> {
+    // This will be implemented in the discovery module
+    // For now, return already registered components
+    return Array.from(this.components.values())
   }
 
   /**
    * Initialize components for current template
    */
   async initializeForTemplate(template: string): Promise<void> {
-    const components = this.getByTemplate(template)
-    const initPromises: Promise<any>[] = []
+    const components = this.getComponentsForTemplate(template)
+    const initPromises: Promise<void>[] = []
 
     for (const component of components) {
-      if (component.loadingStrategy?.type === 'eager' || component.critical) {
-        initPromises.push(this.loadComponent(component.name))
-      } else if (component.loadingStrategy?.type === 'lazy') {
-        this.setupLazyLoading(component)
+      const strategy = this.getLoadingStrategy(component, { template })
+
+      if (strategy.trigger === 'immediate') {
+        initPromises.push(this.initializeComponent(component, strategy))
+      } else if (strategy.trigger === 'viewport') {
+        this.setupLazyLoading(component, strategy)
       }
     }
 
@@ -123,32 +244,37 @@ export class ComponentRegistry {
   /**
    * Setup lazy loading for component
    */
-  private setupLazyLoading(component: ComponentMetadata): void {
+  private setupLazyLoading(component: ComponentMetadata, strategy: LoadingStrategy): void {
     if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
-      // Fallback: load immediately if no IntersectionObserver
-      this.loadComponent(component.name)
+      // Fallback: initialize immediately if no IntersectionObserver
+      this.initializeComponent(component, strategy)
       return
     }
 
-    const options = component.loadingStrategy?.options
+    const viewport = strategy.conditions?.viewport
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            this.loadComponent(component.name)
+            this.initializeComponent(component, strategy)
             observer.disconnect()
           }
         })
       },
       {
-        rootMargin: options?.rootMargin || '50px',
-        threshold: options?.threshold || 0.1,
+        rootMargin: viewport?.rootMargin || '100vh',
+        threshold: viewport?.threshold || 0.1,
       }
     )
 
     // Observe elements that might trigger this component
-    const elements = document.querySelectorAll(`[data-component="${component.name}"]`)
+    const elements = document.querySelectorAll(`[data-component="${component.className}"]`)
     elements.forEach(element => observer.observe(element))
+
+    // If no specific elements found, observe the document body
+    if (elements.length === 0) {
+      observer.observe(document.body)
+    }
   }
 
   /**
@@ -181,26 +307,8 @@ export class ComponentRegistry {
   }
 }
 
-// Singleton instance
-const registry = ComponentRegistry.getInstance()
-
-// Exported functions for convenience
-export function registerComponent(metadata: ComponentMetadata): void {
-  registry.register(metadata)
-}
-
-export function getComponent(name: string): ComponentMetadata | undefined {
-  return registry.get(name)
-}
-
-export function getComponentsByTemplate(template: string): ComponentMetadata[] {
-  return registry.getByTemplate(template)
-}
-
-export function initializeComponents(template?: string): Promise<void> {
-  const currentTemplate = template || getCurrentTemplate()
-  return registry.initializeForTemplate(currentTemplate)
-}
+// Singleton instance - global registry as per contract
+export const registry = ComponentRegistry.getInstance()
 
 /**
  * Get current Shopify template from document
