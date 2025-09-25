@@ -10,6 +10,8 @@
  * Decorators are auto-imported via Vite configuration.
  */
 
+import { Critical } from '@lib/shopify-decorator-system/index.js'
+
 export interface HeaderNavOptions {
   mobileBreakpoint?: number
   searchSelector?: string
@@ -190,13 +192,14 @@ export class HeaderNav {
     if (!navLinks) return
 
     navLinks.forEach((link, index) => {
-      link.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-          e.preventDefault()
+      link.addEventListener('keydown', (e: Event) => {
+        const keyEvent = e as KeyboardEvent
+        if (keyEvent.key === 'ArrowRight' || keyEvent.key === 'ArrowDown') {
+          keyEvent.preventDefault()
           const nextIndex = (index + 1) % navLinks.length
           ;(navLinks[nextIndex] as HTMLElement).focus()
-        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-          e.preventDefault()
+        } else if (keyEvent.key === 'ArrowLeft' || keyEvent.key === 'ArrowUp') {
+          keyEvent.preventDefault()
           const prevIndex = index === 0 ? navLinks.length - 1 : index - 1
           ;(navLinks[prevIndex] as HTMLElement).focus()
         }

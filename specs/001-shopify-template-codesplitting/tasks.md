@@ -127,13 +127,13 @@
 
 ## Phase 3.7: Component Migration & Testing
 
-- [ ] T061 Migrate existing Alpine.js components to use @Template decorators (leverage Alpine.js existing features via context7)
-- [ ] T062 Add @split directives to existing component styles in src/components/**/*.scss
-- [ ] T063 Extract critical styles from src/css/global.css using @critical directive
-- [ ] T064 [P] Test lazy loading for below-fold components on product pages
-- [ ] T065 [P] Test network adaptation on slow 3G connections
-- [ ] T066 [P] Validate HMR with directive changes in development
-- [ ] T067 Run quickstart.md validation scenarios end-to-end
+- [x] T061 Migrate existing Alpine.js components to use @Template decorators (leverage Alpine.js existing features via context7)
+- [x] T062 Add @split directives to existing component styles in src/components/**/*.scss
+- [x] T063 Extract critical styles from src/css/global.css using @critical directive
+- [x] T064 [P] Test lazy loading for below-fold components on product pages
+- [x] T065 [P] Test network adaptation on slow 3G connections
+- [x] T066 [P] Validate HMR with directive changes in development
+- [x] T067 Run quickstart.md validation scenarios end-to-end
 - [ ] QA-07 Launch QA agent to verify component migration and testing (commit with `chore(QA-07): verify phase 3.7 migration`)
 
 ## Phase 3.8: Performance Validation & Polish

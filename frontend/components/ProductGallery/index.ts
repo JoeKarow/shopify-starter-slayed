@@ -10,6 +10,8 @@
  * Decorators are auto-imported via Vite configuration.
  */
 
+import { Template, LazyLoad } from '@lib/shopify-decorator-system/index.js'
+
 export interface ProductGalleryOptions {
   productId?: string
   imageSelector?: string

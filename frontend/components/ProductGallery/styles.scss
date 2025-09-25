@@ -1,0 +1,412 @@
+/**
+ * Product Gallery Component Styles
+ *
+ * Template-specific styles for product gallery with @split directive.
+ * These styles are automatically processed by the PostCSS directive splitter.
+ */
+
+@split product
+/* Product gallery component styles - only loaded on product pages */
+.product-gallery {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  &-main {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    background: var(--color-gray-50);
+    aspect-ratio: 1 / 1;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      cursor: zoom-in;
+
+      &:hover {
+        transform: scale(1.02);
+      }
+    }
+
+    &.zoomed {
+      overflow: visible;
+      z-index: 10;
+
+      img {
+        cursor: zoom-out;
+        transition: transform 0.2s ease;
+      }
+    }
+
+    .gallery-zoom-button {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(4px);
+
+      &:hover {
+        background: white;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      &:focus {
+        outline: 2px solid var(--color-cloud-burst-500);
+        outline-offset: 2px;
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+        color: var(--color-gray-700);
+      }
+    }
+
+    .gallery-loading-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--color-gray-300);
+      border-top-color: var(--color-cloud-burst-500);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  &-thumbnails {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    scroll-behavior: smooth;
+
+    /* Custom scrollbar */
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--color-gray-100);
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--color-cloud-burst-400);
+      border-radius: 3px;
+
+      &:hover {
+        background: var(--color-cloud-burst-500);
+      }
+    }
+  }
+
+  &-thumbnail {
+    flex: 0 0 auto;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    position: relative;
+
+    &:hover {
+      border-color: var(--color-cloud-burst-300);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-cloud-burst-500);
+      box-shadow: 0 0 0 3px var(--color-cloud-burst-100);
+    }
+
+    &.active {
+      border-color: var(--color-cloud-burst-500);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        background: var(--color-cloud-burst-500);
+        border-radius: 50%;
+        opacity: 0.9;
+      }
+
+      &::before {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 1;
+      }
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover img {
+      transform: scale(1.05);
+    }
+  }
+
+  &-details {
+    padding: 1rem 0;
+
+    @media (min-width: 768px) {
+      padding: 2rem 0;
+    }
+  }
+
+  &-counter {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-gray-500);
+
+    .current-image {
+      font-weight: 600;
+      color: var(--color-cloud-burst-600);
+    }
+  }
+
+  &-navigation {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+
+    &:hover {
+      background: white;
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-cloud-burst-500);
+      outline-offset: 2px;
+    }
+
+    &.prev {
+      left: 1rem;
+    }
+
+    &.next {
+      right: 1rem;
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+      color: var(--color-gray-700);
+    }
+  }
+
+  &-main:hover .product-gallery-navigation {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Mobile-specific gallery styles */
+@media (max-width: 768px) {
+  .product-gallery {
+    &-main {
+      aspect-ratio: 4 / 3;
+
+      .gallery-zoom-button {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 36px;
+        height: 36px;
+
+        svg {
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+
+    &-thumbnail {
+      width: 60px;
+      height: 60px;
+    }
+
+    &-navigation {
+      width: 40px;
+      height: 40px;
+
+      &.prev {
+        left: 0.75rem;
+      }
+
+      &.next {
+        right: 0.75rem;
+      }
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .product-gallery {
+    &-thumbnail {
+      width: 70px;
+      height: 70px;
+
+      &:active {
+        transform: translateY(-1px);
+      }
+    }
+
+    &-navigation {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    &-main img:hover {
+      transform: none;
+    }
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .product-gallery {
+    &-main {
+      border: 2px solid currentColor;
+    }
+
+    &-thumbnail {
+      border-width: 3px;
+    }
+
+    &-navigation,
+    .gallery-zoom-button {
+      border: 2px solid currentColor;
+    }
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .product-gallery {
+    &-main img,
+    &-thumbnail img,
+    &-thumbnail,
+    &-navigation,
+    .gallery-zoom-button {
+      transition: none;
+    }
+
+    .gallery-loading-indicator {
+      animation: none;
+    }
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .product-gallery {
+    &-main {
+      background: var(--color-gray-800);
+    }
+
+    &-navigation,
+    .gallery-zoom-button {
+      background: rgba(31, 41, 55, 0.9);
+      color: white;
+
+      &:hover {
+        background: var(--color-gray-700);
+      }
+
+      svg {
+        color: white;
+      }
+    }
+
+    &-counter {
+      color: var(--color-gray-400);
+
+      .current-image {
+        color: var(--color-cloud-burst-400);
+      }
+    }
+  }
+}
+
+/* Animation keyframes */
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Focus visible polyfill support */
+.product-gallery-thumbnail:focus-visible {
+  outline: none;
+  border-color: var(--color-cloud-burst-500);
+  box-shadow: 0 0 0 3px var(--color-cloud-burst-100);
+}
+
+.gallery-zoom-button:focus-visible,
+.product-gallery-navigation:focus-visible {
+  outline: 2px solid var(--color-cloud-burst-500);
+  outline-offset: 2px;
+}
+@endsplit

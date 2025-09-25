@@ -51,6 +51,7 @@
     "postcss": "^8.4.47",
     "postcss-import": "^16.1.0",
     "puppeteer": "24.22.3",
+    "sass-embedded": "1.93.2",
     "tailwindcss": "4.1.13",
     "terser": "^5.44.0",
     "unplugin-auto-import": "20.2.0",
