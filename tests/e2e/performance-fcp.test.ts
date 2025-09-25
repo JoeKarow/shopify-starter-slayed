@@ -40,15 +40,15 @@ async function measurePaintMetrics(page: any) {
 
       // Try to use web-vitals library if available
       if ((window as any).webVitals) {
-        import('web-vitals').then(({ getFCP, getLCP }) => {
+        import('web-vitals').then(({ onFCP, onLCP }) => {
           let collected = 0
 
-          getFCP((metric) => {
+          onFCP((metric: any) => {
             fcp = metric.value
             if (++collected === 2) resolve({ fcp, fmp, lcp })
           })
 
-          getLCP((metric) => {
+          onLCP((metric: any) => {
             lcp = metric.value
             if (++collected === 2) resolve({ fcp, fmp, lcp })
           })

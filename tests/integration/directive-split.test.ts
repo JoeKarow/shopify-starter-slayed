@@ -152,7 +152,7 @@ describe('Directive Split Integration Tests (T019)', () => {
         expect(plugin).toBeDefined()
         expect(typeof plugin).toBe('function')
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -196,7 +196,7 @@ describe('Directive Split Integration Tests (T019)', () => {
 
       } catch (error) {
         // Expected to fail initially - implementation doesn't exist
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -220,7 +220,7 @@ describe('Directive Split Integration Tests (T019)', () => {
 
       } catch (error) {
         // Expected to fail initially
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -247,7 +247,7 @@ describe('Directive Split Integration Tests (T019)', () => {
 
       } catch (error) {
         // Could fail for validation error or missing plugin
-        expect(error.message).toMatch(/Cannot find module|validation|invalid/i)
+        expect((error as Error).message).toMatch(/Cannot find module|validation|invalid/i)
       }
     })
   })
@@ -267,7 +267,7 @@ describe('Directive Split Integration Tests (T019)', () => {
         expect(files).toContain('collection.css')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -300,7 +300,7 @@ describe('Directive Split Integration Tests (T019)', () => {
         }
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -324,7 +324,7 @@ describe('Directive Split Integration Tests (T019)', () => {
         expect(productCSS).not.toContain('@endsplit')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -386,7 +386,7 @@ describe('Directive Split Integration Tests (T019)', () => {
         expect(productCSS).toContain('@media (max-width: 768px)')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -430,7 +430,7 @@ describe('Directive Split Integration Tests (T019)', () => {
         // This is just testing the pipeline integration
 
       } catch (error) {
-        expect(error.message).toMatch(/Cannot find module|autoprefixer/)
+        expect((error as Error).message).toMatch(/Cannot find module|autoprefixer/)
       }
     })
 
@@ -459,7 +459,7 @@ describe('Directive Split Integration Tests (T019)', () => {
       } catch (error) {
         // Could fail due to syntax error or missing plugin
         // Both are valid test outcomes at this stage
-        expect(typeof error.message).toBe('string')
+        expect(typeof (error as Error).message).toBe('string')
       }
     })
 
@@ -541,7 +541,7 @@ describe('Directive Split Integration Tests (T019)', () => {
         expect(productCSS).toContain('.product-component-99')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -577,7 +577,7 @@ describe('Directive Split Integration Tests (T019)', () => {
         )).toBe(true)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -602,7 +602,7 @@ describe('Directive Split Integration Tests (T019)', () => {
         expect(firstRun).toBe(secondRun)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })

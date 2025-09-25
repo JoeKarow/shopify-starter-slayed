@@ -338,7 +338,7 @@ test.describe('JavaScript Performance Tests (T018)', () => {
     test('Should minimize JavaScript main thread blocking', async ({ page }) => {
       await page.goto('http://127.0.0.1:9292/')
 
-      const mainThreadTasks = await page.evaluate(() => {
+      const mainThreadTasks = await page.evaluate((): Promise<{ totalTasks: number; longTasks: number; maxTaskDuration: number; totalBlockingTime: number }> => {
         return new Promise((resolve) => {
           const observer = new PerformanceObserver((list) => {
             const entries = list.getEntries()
@@ -372,10 +372,10 @@ test.describe('JavaScript Performance Tests (T018)', () => {
       console.log('Main Thread Blocking Analysis:', mainThreadTasks)
 
       // Total blocking time should be minimal (< 300ms)
-      expect(mainThreadTasks.totalBlockingTime).toBeLessThan(300)
+      expect((mainThreadTasks as any).totalBlockingTime).toBeLessThan(300)
 
       // Should have few long tasks
-      expect(mainThreadTasks.longTasks).toBeLessThan(3)
+      expect((mainThreadTasks as any).longTasks).toBeLessThan(3)
     })
 
     test('Should use efficient JavaScript patterns', async ({ page }) => {
@@ -443,9 +443,11 @@ test.describe('JavaScript Performance Tests (T018)', () => {
 
       const jsCoverage = await page.coverage.stopJSCoverage()
 
-      const coverageAnalysis = jsCoverage.map(entry => {
-        const totalBytes = entry.text.length
-        const usedBytes = entry.ranges.reduce((sum, range) => sum + (range.end - range.start), 0)
+      const coverageAnalysis = jsCoverage.map((entry: any) => {
+        const totalBytes = entry.source?.length || 0
+        const usedBytes = entry.functions?.reduce((sum: any, func: any) =>
+          sum + func.ranges?.reduce((rangeSum: any, range: any) =>
+            rangeSum + (range.endOffset - range.startOffset), 0) || 0, 0) || 0
 
         return {
           url: entry.url.split('/').pop(),

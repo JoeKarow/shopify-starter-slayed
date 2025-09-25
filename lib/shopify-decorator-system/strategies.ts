@@ -86,7 +86,8 @@ function calculateNetworkAwareStrategy(
 ): LoadingStrategy {
   const slowThreshold = parameters.slowThreshold || 10 // Mbps
   const fallbackStrategy = parameters.fallbackStrategy || 'defer'
-  const reduceQuality = parameters.reduceQuality || false
+  // Note: reduceQuality parameter reserved for future quality adjustments
+  // const reduceQuality = parameters.reduceQuality || false
 
   // Get current network speed
   const networkSpeed = getNetworkSpeed()
@@ -167,7 +168,7 @@ function calculateNetworkAwareStrategy(
  */
 function calculateLazyLoadStrategy(
   parameters: any,
-  context: LoadingContext
+  _context: LoadingContext
 ): LoadingStrategy {
   const rootMargin = parameters.rootMargin || '100vh'
   const threshold = parameters.threshold || 0.1
@@ -296,7 +297,7 @@ export function shouldPreload(
  */
 export function estimateLoadingTime(
   component: ComponentMetadata,
-  context: LoadingContext
+  _context: LoadingContext
 ): number {
   const networkSpeed = getNetworkSpeed()
   const baseSize = 50 // KB - estimated component size

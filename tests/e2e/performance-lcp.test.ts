@@ -11,7 +11,7 @@
  */
 
 import { test, expect, devices } from '@playwright/test'
-import { getCLS, getFCP, getFID, getLCP, getTTFB } from 'web-vitals'
+import { onCLS, onFCP, onLCP, onTTFB, type CLSMetric, type FCPMetric, type LCPMetric, type TTFBMetric } from 'web-vitals'
 
 // Performance budget thresholds
 const PERFORMANCE_BUDGETS = {
@@ -56,28 +56,30 @@ async function measureWebVitals(page: any) {
       }
 
       // Web Vitals measurement
-      import('web-vitals').then(({ getCLS, getFCP, getFID, getLCP, getTTFB }) => {
-        getLCP((metric) => {
+      import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB }) => {
+        onLCP((metric: LCPMetric) => {
           metrics.lcp = metric.value
           checkComplete()
         })
 
-        getFCP((metric) => {
+        onFCP((metric: FCPMetric) => {
           metrics.fcp = metric.value
           checkComplete()
         })
 
-        getCLS((metric) => {
+        onCLS((metric: CLSMetric) => {
           metrics.cls = metric.value
           checkComplete()
         })
 
-        getFID((metric) => {
-          metrics.fid = metric.value
-          checkComplete()
-        })
+        // Note: onFID is deprecated, using onINP instead would be better
+        // For now, removing FID measurement
+        // onFID((metric: FIDMetric) => {
+        //   metrics.fid = metric.value
+        //   checkComplete()
+        // })
 
-        getTTFB((metric) => {
+        onTTFB((metric: TTFBMetric) => {
           metrics.ttfb = metric.value
           checkComplete()
         })
@@ -301,14 +303,14 @@ test.describe('LCP Performance Tests (T015)', () => {
 
       const lcpElement = await page.evaluate(() => {
         return new Promise((resolve) => {
-          import('web-vitals').then(({ getLCP }) => {
-            getLCP((metric) => {
+          import('web-vitals').then(({ onLCP }) => {
+            onLCP((metric: LCPMetric) => {
               const element = metric.entries[metric.entries.length - 1]?.element
               resolve({
                 tagName: element?.tagName,
                 className: element?.className,
                 id: element?.id,
-                src: element?.src || element?.currentSrc
+                src: (element as HTMLImageElement)?.src || (element as HTMLImageElement)?.currentSrc
               })
             })
           })
@@ -324,14 +326,14 @@ test.describe('LCP Performance Tests (T015)', () => {
 
       const lcpElement = await page.evaluate(() => {
         return new Promise((resolve) => {
-          import('web-vitals').then(({ getLCP }) => {
-            getLCP((metric) => {
+          import('web-vitals').then(({ onLCP }) => {
+            onLCP((metric: LCPMetric) => {
               const element = metric.entries[metric.entries.length - 1]?.element
               resolve({
                 tagName: element?.tagName,
                 className: element?.className,
                 id: element?.id,
-                src: element?.src || element?.currentSrc
+                src: (element as HTMLImageElement)?.src || (element as HTMLImageElement)?.currentSrc
               })
             })
           })
@@ -342,7 +344,7 @@ test.describe('LCP Performance Tests (T015)', () => {
       console.log('LCP Element on Product Page:', lcpElement)
 
       // Product pages typically have images as LCP elements
-      expect(lcpElement.tagName).toBe('IMG')
+      expect((lcpElement as any).tagName).toBe('IMG')
     })
   })
 

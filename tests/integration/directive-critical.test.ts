@@ -213,7 +213,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(plugin).toBeDefined()
         expect(typeof plugin).toBe('function')
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -257,7 +257,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(collectionContent).not.toContain('.product-hero') // Should not include other templates
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -279,7 +279,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(mainContent).toContain('.related-products')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -322,7 +322,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(productCritical).not.toContain('.non-critical')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -366,7 +366,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(result.stderr || result.stdout).toMatch(/budget|exceed|limit|size/i)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -411,7 +411,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(globalCritical.includes('\n\n')).toBe(false)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -453,7 +453,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(hasInlineSourceMap || hasSourceMapFile).toBe(true)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -502,7 +502,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(mainContent).toContain('--primary-color')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -534,7 +534,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         )).toBe(true)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -555,7 +555,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         }
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -574,7 +574,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(globalCritical).toMatch(/@media.*{[\s\S]*?}/m)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -608,7 +608,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(size).toBeLessThan(2048) // 2KB
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -681,7 +681,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(size).toBeLessThan(14000) // 14KB budget
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -750,7 +750,7 @@ describe('Critical CSS Extraction Integration Tests (T020)', () => {
         expect(globalCritical).toContain('@supports')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })

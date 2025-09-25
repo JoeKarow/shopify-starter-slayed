@@ -457,7 +457,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(networkStatus.rtt).toBeGreaterThan(0)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -471,13 +471,12 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         await registry.discoverComponents(COMPONENTS_DIR)
 
         const adaptiveGallery = registry.getComponentsForTemplate('product')
-          .find(c => c.className === 'AdaptiveGallery')
+          .find((c: any) => c.className === 'AdaptiveGallery')
 
         expect(adaptiveGallery).toBeDefined()
 
         // Test fast network strategy
-        global.navigator.connection.downlink = 20
-        global.navigator.connection.effectiveType = '4g'
+        (global.navigator as any).connection = { downlink: 20, effectiveType: '4g' }
 
         let fastStrategy = registry.getLoadingStrategy(adaptiveGallery, {
           template: 'product',
@@ -488,8 +487,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(fastStrategy.priority).toBeLessThan(10) // Higher priority
 
         // Test slow network strategy
-        global.navigator.connection.downlink = 2
-        global.navigator.connection.effectiveType = '3g'
+        (global.navigator as any).connection = { downlink: 2, effectiveType: '3g' }
 
         let slowStrategy = registry.getLoadingStrategy(adaptiveGallery, {
           template: 'product',
@@ -501,7 +499,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(slowStrategy.fallback?.trigger).toBe('idle')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -518,7 +516,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         await registry.discoverComponents(COMPONENTS_DIR)
 
         const dataSaverComponent = registry.getComponentsForTemplate('index')
-          .find(c => c.className === 'DataSaverAware')
+          .find((c: any) => c.className === 'DataSaverAware')
 
         const strategy = registry.getLoadingStrategy(dataSaverComponent, {
           template: 'index',
@@ -530,7 +528,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(strategy.options?.respectDataSaver).toBe(true)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -569,7 +567,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(updatedStatus.type).toBe('slow')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -586,7 +584,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
         // Test 'defer' strategy
         const adaptiveGallery = registry.getComponentsForTemplate('product')
-          .find(c => c.className === 'AdaptiveGallery')
+          .find((c: any) => c.className === 'AdaptiveGallery')
 
         const deferStrategy = registry.getLoadingStrategy(adaptiveGallery, {
           template: 'product',
@@ -597,7 +595,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
         // Test 'simplify' strategy
         const smartVideo = registry.getComponentsForTemplate('product')
-          .find(c => c.className === 'SmartVideo')
+          .find((c: any) => c.className === 'SmartVideo')
 
         const simplifyStrategy = registry.getLoadingStrategy(smartVideo, {
           template: 'product',
@@ -608,7 +606,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
         // Test 'critical-only' strategy
         const dynamicLoader = registry.getComponentsForTemplate('index')
-          .find(c => c.className === 'DynamicLoader')
+          .find((c: any) => c.className === 'DynamicLoader')
 
         const criticalOnlyStrategy = registry.getLoadingStrategy(dynamicLoader, {
           template: 'index',
@@ -618,7 +616,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(criticalOnlyStrategy.options?.criticalOnly).toBe(true)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -653,7 +651,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(loadTime).toBeLessThan(5000) // 5 seconds
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -692,7 +690,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         }
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -706,7 +704,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         await registry.discoverComponents(COMPONENTS_DIR)
 
         const adaptiveGallery = registry.getComponentsForTemplate('product')
-          .find(c => c.className === 'AdaptiveGallery')
+          .find((c: any) => c.className === 'AdaptiveGallery')
 
         // Should have reduceQuality option enabled
         const networkAwareDecorator = adaptiveGallery.decorators
@@ -731,7 +729,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(verySlowStrategy.options?.quality).toBe('low')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -758,7 +756,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(metrics.bytesReduced).toBeGreaterThanOrEqual(0)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -791,7 +789,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(recommendations.length).toBeGreaterThan(0)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -822,7 +820,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(adaptedSettings.slowThreshold).toBeLessThan(10)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -848,7 +846,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(dataSaverComponent.render()).toContain('data-saver-mode')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -878,7 +876,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(component.imageQuality).toBe('high') // Despite slow network
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -903,7 +901,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(components.length).toBeGreaterThan(0)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -936,7 +934,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         )).toBe(true)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -961,7 +959,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(networkStatus.type).toMatch(/fast|slow|unknown/)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -987,7 +985,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
       try {
         const components = await registry.discoverComponents(COMPONENTS_DIR)
-        const conflictingComponent = components.find(c => c.className === 'ConflictingComponent')
+        const conflictingComponent = components.find((c: any) => c.className === 'ConflictingComponent')
 
         if (conflictingComponent) {
           // Should either merge settings or warn about conflict
@@ -1003,7 +1001,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         }
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -1034,7 +1032,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         })
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -1065,7 +1063,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(removeEventListenerSpy).toHaveBeenCalled()
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })

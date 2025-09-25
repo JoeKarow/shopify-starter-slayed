@@ -381,7 +381,7 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
 
         expect(discoveredComponents).toHaveLength(5) // 5 component files
 
-        const componentNames = discoveredComponents.map(c => c.className)
+        const componentNames = discoveredComponents.map((c: any) => c.className)
         expect(componentNames).toContain('ProductGallery')
         expect(componentNames).toContain('HeaderNav')
         expect(componentNames).toContain('CartDrawer')
@@ -389,13 +389,13 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         expect(componentNames).toContain('SearchAutocomplete')
 
         // Should have correct file paths
-        discoveredComponents.forEach(component => {
+        discoveredComponents.forEach((component: any) => {
           expect(component.filePath).toMatch(/\.ts$/)
           expect(component.filePath).toContain('/components/')
         })
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -410,13 +410,13 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         const discoveredComponents = await registry.discoverComponents(path.join(TEST_DIR, 'frontend'))
 
         // Should only find decorated components, not utility files or stores
-        const componentNames = discoveredComponents.map(c => c.className)
+        const componentNames = discoveredComponents.map((c: any) => c.className)
         expect(componentNames).not.toContain('helpers')
         expect(componentNames).not.toContain('cartStore')
         expect(componentNames).not.toContain('CartState')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -449,12 +449,12 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
 
         expect(discoveredComponents).toHaveLength(6) // Original 5 + nested 1
 
-        const variantSelector = discoveredComponents.find(c => c.className === 'VariantSelector')
+        const variantSelector = discoveredComponents.find((c: any) => c.className === 'VariantSelector')
         expect(variantSelector).toBeDefined()
         expect(variantSelector.filePath).toContain('/product/VariantSelector.ts')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -491,12 +491,12 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         const discoveredComponents = await registry.discoverComponents(COMPONENTS_DIR)
 
         // Should find components regardless of file extension
-        const componentNames = discoveredComponents.map(c => c.className)
+        const componentNames = discoveredComponents.map((c: any) => c.className)
         expect(componentNames).toContain('TestComponent')
         expect(componentNames).toContain('AnotherComponent')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -511,19 +511,19 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
       try {
         const discoveredComponents = await registry.discoverComponents(COMPONENTS_DIR)
 
-        const productGallery = discoveredComponents.find(c => c.className === 'ProductGallery')
+        const productGallery = discoveredComponents.find((c: any) => c.className === 'ProductGallery')
         expect(productGallery).toBeDefined()
 
-        const templateDecorator = productGallery.decorators.find(d => d.type === 'Template')
+        const templateDecorator = productGallery.decorators.find((d: any) => d.type === 'Template')
         expect(templateDecorator).toBeDefined()
         expect(templateDecorator.parameters).toEqual(['product'])
 
-        const headerNav = discoveredComponents.find(c => c.className === 'HeaderNav')
-        const headerTemplate = headerNav.decorators.find(d => d.type === 'Template')
+        const headerNav = discoveredComponents.find((c: any) => c.className === 'HeaderNav')
+        const headerTemplate = headerNav.decorators.find((d: any) => d.type === 'Template')
         expect(headerTemplate.parameters).toEqual(['*'])
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -536,8 +536,8 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
       try {
         const discoveredComponents = await registry.discoverComponents(COMPONENTS_DIR)
 
-        const productGallery = discoveredComponents.find(c => c.className === 'ProductGallery')
-        const lazyLoadDecorator = productGallery.decorators.find(d => d.type === 'LazyLoad')
+        const productGallery = discoveredComponents.find((c: any) => c.className === 'ProductGallery')
+        const lazyLoadDecorator = productGallery.decorators.find((d: any) => d.type === 'LazyLoad')
 
         expect(lazyLoadDecorator).toBeDefined()
         expect(lazyLoadDecorator.parameters).toEqual({
@@ -545,15 +545,15 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
           threshold: 0.1
         })
 
-        const cartDrawer = discoveredComponents.find(c => c.className === 'CartDrawer')
-        const cartLazyLoad = cartDrawer.decorators.find(d => d.type === 'LazyLoad')
+        const cartDrawer = discoveredComponents.find((c: any) => c.className === 'CartDrawer')
+        const cartLazyLoad = cartDrawer.decorators.find((d: any) => d.type === 'LazyLoad')
         expect(cartLazyLoad.parameters).toEqual({
           rootMargin: '200vh',
           threshold: 0
         })
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -566,14 +566,14 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
       try {
         const discoveredComponents = await registry.discoverComponents(COMPONENTS_DIR)
 
-        const headerNav = discoveredComponents.find(c => c.className === 'HeaderNav')
-        const criticalDecorator = headerNav.decorators.find(d => d.type === 'Critical')
+        const headerNav = discoveredComponents.find((c: any) => c.className === 'HeaderNav')
+        const criticalDecorator = headerNav.decorators.find((d: any) => d.type === 'Critical')
 
         expect(criticalDecorator).toBeDefined()
         expect(criticalDecorator.parameters).toEqual({})
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -586,23 +586,23 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
       try {
         const discoveredComponents = await registry.discoverComponents(COMPONENTS_DIR)
 
-        const productGallery = discoveredComponents.find(c => c.className === 'ProductGallery')
-        const networkDecorator = productGallery.decorators.find(d => d.type === 'NetworkAware')
+        const productGallery = discoveredComponents.find((c: any) => c.className === 'ProductGallery')
+        const networkDecorator = productGallery.decorators.find((d: any) => d.type === 'NetworkAware')
 
         expect(networkDecorator).toBeDefined()
         expect(networkDecorator.parameters).toEqual({
           slowThreshold: 5
         })
 
-        const headerNav = discoveredComponents.find(c => c.className === 'HeaderNav')
-        const headerNetwork = headerNav.decorators.find(d => d.type === 'NetworkAware')
+        const headerNav = discoveredComponents.find((c: any) => c.className === 'HeaderNav')
+        const headerNetwork = headerNav.decorators.find((d: any) => d.type === 'NetworkAware')
         expect(headerNetwork.parameters).toEqual({
           slowThreshold: 10,
           fallbackStrategy: 'critical-only'
         })
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -615,17 +615,17 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
       try {
         const discoveredComponents = await registry.discoverComponents(COMPONENTS_DIR)
 
-        const productGallery = discoveredComponents.find(c => c.className === 'ProductGallery')
+        const productGallery = discoveredComponents.find((c: any) => c.className === 'ProductGallery')
 
         // Should track method decorators if implementation supports it
         if (productGallery.methods) {
-          const handleResize = productGallery.methods.find(m => m.name === 'handleResize')
+          const handleResize = productGallery.methods.find((m: any) => m.name === 'handleResize')
           expect(handleResize?.decorators).toContainEqual({
             type: 'Debounced',
             parameters: 300
           })
 
-          const loadImageData = productGallery.methods.find(m => m.name === 'loadImageData')
+          const loadImageData = productGallery.methods.find((m: any) => m.name === 'loadImageData')
           expect(loadImageData?.decorators).toContainEqual({
             type: 'Cached',
             parameters: 60000
@@ -633,7 +633,7 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         }
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -646,17 +646,17 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
       try {
         const discoveredComponents = await registry.discoverComponents(COMPONENTS_DIR)
 
-        const productGallery = discoveredComponents.find(c => c.className === 'ProductGallery')
+        const productGallery = discoveredComponents.find((c: any) => c.className === 'ProductGallery')
 
         expect(productGallery.decorators).toHaveLength(3) // Template, LazyLoad, NetworkAware
 
-        const decoratorTypes = productGallery.decorators.map(d => d.type)
+        const decoratorTypes = productGallery.decorators.map((d: any) => d.type)
         expect(decoratorTypes).toContain('Template')
         expect(decoratorTypes).toContain('LazyLoad')
         expect(decoratorTypes).toContain('NetworkAware')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -676,12 +676,12 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         const productComponents = registry.getComponentsForTemplate('product')
         expect(productComponents.length).toBeGreaterThan(0)
 
-        const productComponentNames = productComponents.map(c => c.className)
+        const productComponentNames = productComponents.map((c: any) => c.className)
         expect(productComponentNames).toContain('ProductGallery')
         expect(productComponentNames).toContain('CollectionFilters')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -696,23 +696,23 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
 
         // Check product template components
         const productComponents = registry.getComponentsForTemplate('product')
-        const productNames = productComponents.map(c => c.className)
+        const productNames = productComponents.map((c: any) => c.className)
         expect(productNames).toContain('ProductGallery') // @Template(['product'])
 
         // Check collection template components
         const collectionComponents = registry.getComponentsForTemplate('collection')
-        const collectionNames = collectionComponents.map(c => c.className)
+        const collectionNames = collectionComponents.map((c: any) => c.className)
         expect(collectionNames).toContain('CollectionFilters') // @Template(['collection'])
 
         // Check global components (should appear in all templates)
         const homeComponents = registry.getComponentsForTemplate('index')
-        const homeNames = homeComponents.map(c => c.className)
+        const homeNames = homeComponents.map((c: any) => c.className)
         expect(homeNames).toContain('HeaderNav') // @Template(['*'])
         expect(homeNames).toContain('CartDrawer') // @Template(['*'])
         expect(homeNames).toContain('SearchAutocomplete') // @Template(['*'])
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -742,7 +742,7 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         const discoveredComponents = await registry.discoverComponents(COMPONENTS_DIR)
 
         // Should either reject the component or log warnings
-        const invalidComponent = discoveredComponents.find(c => c.className === 'InvalidComponent')
+        const invalidComponent = discoveredComponents.find((c: any) => c.className === 'InvalidComponent')
 
         if (invalidComponent) {
           // If component is discovered, it should have warnings
@@ -750,11 +750,11 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
           expect(invalidComponent.warnings.length).toBeGreaterThan(0)
         } else {
           // Component was rejected due to invalid decorators - this is also valid
-          expect(discoveredComponents.map(c => c.className)).not.toContain('InvalidComponent')
+          expect(discoveredComponents.map((c: any) => c.className)).not.toContain('InvalidComponent')
         }
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -784,7 +784,7 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         expect(secondRun).toHaveLength(firstRun.length)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -817,10 +817,10 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         })
 
         expect(updatedComponents).toHaveLength(initialCount + 1)
-        expect(updatedComponents.map(c => c.className)).toContain('NewComponent')
+        expect(updatedComponents.map((c: any) => c.className)).toContain('NewComponent')
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -861,7 +861,7 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         expect(discoveredComponents).toHaveLength(105)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
   })
@@ -893,11 +893,11 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         expect(Array.isArray(discoveredComponents)).toBe(true)
 
         // Should still discover valid components
-        expect(discoveredComponents.map(c => c.className)).toContain('ProductGallery')
+        expect(discoveredComponents.map((c: any) => c.className)).toContain('ProductGallery')
 
       } catch (error) {
         // Parsing errors are acceptable for malformed files
-        expect(error.message).toMatch(/parse|syntax|malformed/i)
+        expect((error as Error).message).toMatch(/parse|syntax|malformed/i)
       }
     })
 
@@ -928,7 +928,7 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         expect(Array.isArray(discoveredComponents)).toBe(true)
 
       } catch (error) {
-        expect(error.message).toContain('Cannot find module')
+        expect((error as Error).message).toContain('Cannot find module')
       }
     })
 
@@ -950,7 +950,7 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
 
       } catch (error) {
         // Either empty array or error is acceptable
-        expect(typeof error.message === 'string').toBe(true)
+        expect(typeof (error as Error).message === 'string').toBe(true)
       }
     })
 
@@ -996,14 +996,14 @@ describe('Decorator Auto-Discovery Integration Tests (T021)', () => {
         expect(Array.isArray(discoveredComponents)).toBe(true)
 
         // May or may not include circular components depending on implementation
-        const componentNames = discoveredComponents.map(c => c.className)
+        const componentNames = discoveredComponents.map((c: any) => c.className)
         if (componentNames.includes('CircularA') || componentNames.includes('CircularB')) {
           expect(componentNames.length).toBeGreaterThan(0)
         }
 
       } catch (error) {
         // Circular dependency errors are acceptable
-        expect(error.message).toMatch(/circular|dependency|module/i)
+        expect((error as Error).message).toMatch(/circular|dependency|module/i)
       }
     })
   })
