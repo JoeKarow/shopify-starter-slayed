@@ -9,7 +9,8 @@
     "dist",
     "build",
     "node_modules",
-    "**/*.min.js"
+    "**/*.min.js",
+    "specs"
   ],
   "compilerOptions": {
     // Language and Environment
