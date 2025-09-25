@@ -8,3 +8,6 @@ dist/
 
 # Shopify CLI
 shopify.theme.toml
+
+# Generated type definitions
+auto-imports.d.ts
