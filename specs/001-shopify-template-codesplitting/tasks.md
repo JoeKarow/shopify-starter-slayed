@@ -109,7 +109,7 @@
 - [x] T048a Configure development-mode source maps in PostCSS pipeline for debugging
 - [x] T049 [P] Create Vite plugin for Liquid snippet generation in lib/vite-plugin-liquid-snippets/index.ts
 - [x] T050 Configure asset fingerprinting for cache busting in vite.config.ts
-- [ ] QA-05 Launch QA agent to verify Vite integration (commit with `chore(QA-05): verify phase 3.5 vite`)
+- [x] QA-05 Launch QA agent to verify Vite integration (commit with `chore(QA-05): verify phase 3.5 vite`)
 
 ## Phase 3.6: Shopify Theme Integration
 
