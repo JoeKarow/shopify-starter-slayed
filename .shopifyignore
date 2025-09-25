@@ -1,8 +1,57 @@
+# Package management and configuration files
 package.json
 package-lock.json
+bun.lock
+yarn.lock
 vite.config.ts
 README.md
+CLAUDE.md
 jsconfig.json
 tsconfig.json
+postcss.config.ts
 postcss.config.cjs
+tailwind.config.js
+mise.toml
+bootstrap.sh
+biome.json
+playwright.config.js
+vitest.config.js
+
+# Development and build directories
 assets/.vite
+node_modules/
+.git/
+.github/
+.claude/
+.shopify/
+.specify/
+dist/
+frontend/
+src/
+lib/
+tests/
+specs/
+types/
+public/
+
+# Generated CSS split files and reports
+frontend/entrypoints/splits/
+*.css.report.json
+*.js.report.json
+performance-budget.json
+bundle-analysis.json
+
+# Source maps and development artifacts
+*.map
+*.hot-update.*
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Environment and configuration files
+.env*
+auto-imports.d.ts
+
+# Documentation and specifications
+*.md

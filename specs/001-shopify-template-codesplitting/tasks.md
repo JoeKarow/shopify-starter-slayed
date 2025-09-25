@@ -113,16 +113,16 @@
 
 ## Phase 3.6: Shopify Theme Integration
 
-- [ ] T051 Update layout/theme.liquid to include critical CSS snippet
-- [ ] T052 Create snippets/critical-global-css.liquid template
-- [ ] T053 [P] Add template-specific CSS loading to templates/product.liquid
-- [ ] T054 [P] Add template-specific CSS loading to templates/collection.liquid
-- [ ] T055 [P] Add template-specific CSS loading to templates/cart.liquid
-- [ ] T056 Update frontend/entrypoints/theme.scss with directive examples
-- [ ] T057 [P] Create frontend/components/ProductGallery/index.ts with decorators
-- [ ] T058 [P] Create frontend/components/HeaderNav/index.ts with @Critical decorator
-- [ ] T059 Configure Shopify CLI to recognize generated assets in shopify.theme.toml
-- [ ] T060 Add generated files to .shopifyignore patterns
+- [x] T051 Update layout/theme.liquid to include critical CSS snippet
+- [x] T052 Create snippets/critical-global-css.liquid template
+- [x] T053 [P] Add template-specific CSS loading to templates/product.liquid
+- [x] T054 [P] Add template-specific CSS loading to templates/collection.liquid
+- [x] T055 [P] Add template-specific CSS loading to templates/cart.liquid
+- [x] T056 Update frontend/entrypoints/theme.scss with directive examples
+- [x] T057 [P] Create frontend/components/ProductGallery/index.ts with decorators
+- [x] T058 [P] Create frontend/components/HeaderNav/index.ts with @Critical decorator
+- [x] T059 Configure Shopify CLI to recognize generated assets in shopify.theme.toml
+- [x] T060 Add generated files to .shopifyignore patterns
 - [ ] QA-06 Launch QA agent to verify Shopify theme integration (commit with `chore(QA-06): verify phase 3.6 shopify`)
 
 ## Phase 3.7: Component Migration & Testing
