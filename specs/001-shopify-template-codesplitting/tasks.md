@@ -123,7 +123,7 @@
 - [x] T058 [P] Create frontend/components/HeaderNav/index.ts with @Critical decorator
 - [x] T059 Configure Shopify CLI to recognize generated assets in shopify.theme.toml
 - [x] T060 Add generated files to .shopifyignore patterns
-- [ ] QA-06 Launch QA agent to verify Shopify theme integration (commit with `chore(QA-06): verify phase 3.6 shopify`)
+- [x] QA-06 Launch QA agent to verify Shopify theme integration (commit with `chore(QA-06): verify phase 3.6 shopify`)
 
 ## Phase 3.7: Component Migration & Testing
 
