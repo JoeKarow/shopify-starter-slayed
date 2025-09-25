@@ -39,10 +39,11 @@ export function checkBudget(
 
   const violations: BudgetViolation[] = []
 
-  // Separate files by type
+  // Separate files by type - only count CSS files for budgets
   const criticalFiles = files.filter(f => f.type === 'critical-css')
   const templateFiles = files.filter(f => f.type === 'css-split')
-  const totalSize = files.reduce((sum, f) => sum + f.size, 0)
+  const cssFiles = files.filter(f => f.type === 'critical-css' || f.type === 'css-split')
+  const totalSize = cssFiles.reduce((sum, f) => sum + f.size, 0)
 
   // Calculate critical CSS size
   const criticalSize = criticalFiles.reduce((sum, f) => sum + f.size, 0)
@@ -113,13 +114,26 @@ export function checkBudget(
 
   // Determine overall status
   let status: BudgetResult['status'] = 'pass'
+
   if (violations.length > 0) {
-    const hasFailures = violations.some(v =>
-      (v.type === 'criticalCSS' && v.actual > v.budget * 1.2) ||
-      (v.type === 'templateCSS' && v.actual > v.budget * 1.5) ||
-      (v.type === 'totalCSS' && v.actual > v.budget * 1.1)
-    )
-    status = hasFailures ? 'fail' : 'warning'
+    // Any actual violation is a fail
+    status = 'fail'
+  } else {
+    // Check for warning conditions (approaching limits)
+    const criticalWarning = criticalSize > budgets.criticalCSS * 0.9 && criticalSize <= budgets.criticalCSS
+    const totalWarning = totalSize > budgets.totalCSS * 0.9 && totalSize <= budgets.totalCSS
+
+    let templateWarning = false
+    for (const size of Object.values(templateSizes)) {
+      if (size > budgets.templateCSS * 0.9 && size <= budgets.templateCSS) {
+        templateWarning = true
+        break
+      }
+    }
+
+    if (criticalWarning || totalWarning || templateWarning) {
+      status = 'warning'
+    }
   }
 
   return {

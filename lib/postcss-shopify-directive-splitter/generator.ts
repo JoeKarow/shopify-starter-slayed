@@ -71,6 +71,11 @@ function groupDirectivesByTypeAndTarget(directives: ProcessedDirective[]) {
     const target = directive.target || 'global'
     const map = grouped[directive.type]
 
+    // Skip invalid directive types
+    if (!map) {
+      continue
+    }
+
     if (!map.has(target)) {
       map.set(target, [])
     }

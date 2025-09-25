@@ -166,7 +166,16 @@ const api: DirectiveSplitterAPI = Object.assign(directiveSplitter, {
    * Check performance budget compliance
    */
   checkBudget: (files: GeneratedFile[], options: DirectiveSplitterOptions) => {
-    return checkBudget(files, options)
+    const result = checkBudget(files, options)
+    return {
+      status: result.status,
+      violations: result.violations.map(v => ({
+        type: v.type,
+        actual: v.actual,
+        budget: v.budget,
+        message: v.message
+      }))
+    }
   }
 })
 

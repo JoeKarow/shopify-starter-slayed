@@ -77,9 +77,20 @@ function processSplitDirective(
 
   const target = params[0]
 
-  // Validate against allowed splits
-  if (!options.validSplits.includes(target)) {
-    return null // Invalid split target
+  // Handle comma-separated templates
+  if (target.includes(',')) {
+    const templates = target.split(',').map(t => t.trim())
+    // For comma-separated, validate each template individually
+    for (const template of templates) {
+      if (template && !options.validSplits.includes(template)) {
+        return null // Invalid split target
+      }
+    }
+  } else {
+    // Single template validation
+    if (!options.validSplits.includes(target)) {
+      return null // Invalid split target
+    }
   }
 
   return {

@@ -25,7 +25,7 @@ export function generateSplitFilePath(
   entrypointsDir: string,
   template: string
 ): string {
-  return path.join(themeRoot, entrypointsDir, 'splits', `split-${template}-css.liquid`)
+  return path.join(themeRoot, entrypointsDir, 'splits', `${template}.css`)
 }
 
 /**
@@ -37,8 +37,8 @@ export function generateCriticalFilePath(
   template?: string
 ): string {
   const fileName = template && template !== 'global'
-    ? `critical-${template}-css.liquid`
-    : 'critical-global-css.liquid'
+    ? `critical-${template}.css`
+    : 'critical-global.css'
 
   return path.join(themeRoot, entrypointsDir, 'splits', fileName)
 }
