@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * TypeScript Decorator System Contract
  * Defines interfaces for component decorators and registration

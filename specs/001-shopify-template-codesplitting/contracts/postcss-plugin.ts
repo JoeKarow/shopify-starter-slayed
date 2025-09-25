@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * PostCSS Plugin Contract for Shopify Directive Splitter
  * This defines the plugin interface for build-time CSS processing
