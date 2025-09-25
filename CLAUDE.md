@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Shopify starter theme built with Vite, Alpine.js, TailwindCSS v4, and Liquid. It uses the Shopify Vite Plugin for development and build processes.
+This is a performance-optimized Shopify starter theme built with Vite, Alpine.js, TailwindCSS v4, and Liquid. It features automated CSS/JS code splitting through declarative directives and decorators, achieving sub-2.5s mobile load times. The theme uses the Shopify Vite Plugin for development and build processes.
 
 ## Essential Commands
 
@@ -70,10 +70,18 @@ npm run shopify:pull-dev # Pull development theme
   - Custom variants: `scrolled`, `mobile-menu-visible`
   - Custom colors: `cloud-burst`, `woodland`
 - **Liquid Ajax Cart v2**: AJAX cart functionality with directives throughout sections
+- **Performance Optimization System**:
+  - CSS Directives: `@split`, `@critical`, `@inline` for automated code splitting
+  - TypeScript Decorators: `@Template`, `@LazyLoad`, `@NetworkAware` for component loading
+  - PostCSS plugin: `postcss-shopify-directive-splitter` for build-time processing
+  - Performance budgets enforced: CSS<250KB, Critical<14KB, JS<100KB
 
 ### Project Structure
 
-- `src/entrypoints/`: Vite entry points (theme.js, etc.)
+- `frontend/entrypoints/`: Vite entry points with directive-based CSS (theme.css, theme.ts)
+- `frontend/entrypoints/splits/`: Auto-generated template-specific CSS files
+- `frontend/components/`: TypeScript components with decorators
+- `frontend/decorators/`: Decorator implementations and component registry
 - `src/js/alpine/`: Alpine.js components, stores, directives, magic properties
 - `src/js/prodify/`: TypeScript-based product variant picker system
 - `src/css/`: CSS files including global.css for non-tree-shaken styles
@@ -115,3 +123,59 @@ If assets aren't loading due to SSL errors:
 - Shopify theme changes trigger reload via `/tmp/theme.update`
 - Liquid file changes handled by custom Vite plugin to prevent full refresh
 - HMR enabled for JavaScript/CSS changes
+- Directive changes in CSS trigger automatic re-splitting
+
+## Performance Optimization Patterns
+
+### CSS Directives
+
+Use directives to control CSS splitting and loading:
+
+```css
+/* Extract critical above-the-fold styles */
+@critical global
+  .header { /* styles */ }
+@endcritical
+
+/* Split styles by template */
+@split product
+  .product-gallery { /* styles */ }
+@endsplit
+
+/* Inline component styles */
+@inline cart-drawer lazy scoped
+  .drawer { /* styles */ }
+@endinline
+```
+
+### TypeScript Decorators
+
+Control component loading with decorators:
+
+```typescript
+// Load only on specific templates
+@Template(['product', 'collection'])
+@LazyLoad({ rootMargin: '100vh' })
+class ProductGallery { }
+
+// Critical path components
+@Critical()
+@NetworkAware({ slowThreshold: 10 })
+class HeaderNav { }
+```
+
+### Performance Guidelines
+
+- Keep critical CSS under 14KB per template
+- Template-specific CSS should be under 30KB
+- Total CSS must stay under 250KB
+- Main JavaScript bundle under 100KB
+- Target mobile LCP under 2.5 seconds
+- Use `@LazyLoad` for below-fold components
+- Apply `@NetworkAware` for adaptive loading
+
+## Recent Changes
+
+- **2025-09-24**: Implemented performance optimization system with CSS directives and TypeScript decorators
+- **2025-09-24**: Added PostCSS plugin for automated code splitting
+- **2025-09-24**: Configured performance budget enforcement in build pipeline
