@@ -37,65 +37,65 @@
 
 ## Phase 3.1: Project Setup & Configuration
 
-- [ ] T001 Initialize lib/postcss-shopify-directive-splitter package structure with index.ts, parser.ts, generator.ts
-- [ ] T002 [P] Initialize lib/shopify-decorator-system package with index.ts, decorators/, registry.ts
-- [ ] T003 [P] Initialize lib/vite-plugin-performance-budget package with index.ts for budget enforcement
-- [ ] T004 Configure PostCSS pipeline in postcss.config.ts with directive splitter plugin
-- [ ] T005 [P] Update tsconfig.json with experimentalDecorators: true, Stage 2 decorator support, and any other necessary TypeScript configurations
-- [ ] T006 [P] Configure Vite auto-imports for global decorator availability in vite.config.ts
-- [ ] T007 Create frontend/entrypoints/splits/ directory for generated CSS files
-- [ ] T008 [P] Update existing mise.toml with performance tasks and create bootstrap.sh script for mise installation
+- [x] T001 Initialize lib/postcss-shopify-directive-splitter package structure with index.ts, parser.ts, generator.ts
+- [x] T002 [P] Initialize lib/shopify-decorator-system package with index.ts, decorators/, registry.ts
+- [x] T003 [P] Initialize lib/vite-plugin-performance-budget package with index.ts for budget enforcement
+- [x] T004 Configure PostCSS pipeline in postcss.config.ts with directive splitter plugin
+- [x] T005 [P] Update tsconfig.json with experimentalDecorators: true, Stage 2 decorator support, and any other necessary TypeScript configurations
+- [x] T006 [P] Configure Vite auto-imports for global decorator availability in vite.config.ts
+- [x] T007 Create frontend/entrypoints/splits/ directory for generated CSS files
+- [x] T008 [P] Update existing mise.toml with performance tasks and create bootstrap.sh script for mise installation
 - [ ] QA-01 Launch QA agent to verify setup configuration (commit with `chore(QA-01): verify phase 3.1 setup`)
 
 ## Phase 3.2: Contract & Performance Tests First ⚠️ MUST COMPLETE BEFORE 3.3
 
 **CRITICAL: These tests MUST be written and MUST FAIL before ANY implementation**
 
-- [ ] T009 [P] Contract test: PostCSS plugin processDirective() in tests/unit/postcss-plugin.test.ts
-- [ ] T010 [P] Contract test: PostCSS plugin generateFiles() in tests/unit/postcss-generator.test.ts
-- [ ] T011 [P] Contract test: PostCSS plugin checkBudget() in tests/unit/postcss-budget.test.ts
-- [ ] T012 [P] Contract test: Decorator system Template decorator in tests/unit/decorator-template.test.ts
-- [ ] T013 [P] Contract test: Decorator system LazyLoad decorator in tests/unit/decorator-lazyload.test.ts
-- [ ] T014 [P] Contract test: Component registry in tests/unit/component-registry.test.ts
-- [ ] T015 [P] Performance test: LCP < 2.5s mobile in tests/e2e/performance-lcp.test.ts
-- [ ] T016 [P] Performance test: Total CSS < 250KB in tests/e2e/performance-css.test.ts
-- [ ] T017 [P] Performance test: Critical CSS < 14KB in tests/e2e/performance-critical.test.ts
-- [ ] T018 [P] Performance test: Main JS < 100KB in tests/e2e/performance-js.test.ts
-- [ ] T018a [P] Performance test: TTI < 3.5s on 3G in tests/e2e/performance-tti.test.ts
-- [ ] T018b [P] Performance test: FCP < 1.8s in tests/e2e/performance-fcp.test.ts
-- [ ] T018c [P] Performance test: CLS < 0.1 in tests/e2e/performance-cls.test.ts
-- [ ] T019 [P] Integration test: @split directive processing in tests/integration/directive-split.test.ts
-- [ ] T020 [P] Integration test: @critical directive extraction in tests/integration/directive-critical.test.ts
-- [ ] T021 [P] Integration test: Decorator auto-discovery in tests/integration/decorator-discovery.test.ts
-- [ ] T022 [P] Integration test: Network-aware loading in tests/integration/network-aware.test.ts
+- [x] T009 [P] Contract test: PostCSS plugin processDirective() in tests/unit/postcss-plugin.test.ts
+- [x] T010 [P] Contract test: PostCSS plugin generateFiles() in tests/unit/postcss-generator.test.ts
+- [x] T011 [P] Contract test: PostCSS plugin checkBudget() in tests/unit/postcss-budget.test.ts
+- [x] T012 [P] Contract test: Decorator system Template decorator in tests/unit/decorator-template.test.ts
+- [x] T013 [P] Contract test: Decorator system LazyLoad decorator in tests/unit/decorator-lazyload.test.ts
+- [x] T014 [P] Contract test: Component registry in tests/unit/component-registry.test.ts
+- [x] T015 [P] Performance test: LCP < 2.5s mobile in tests/e2e/performance-lcp.test.ts
+- [x] T016 [P] Performance test: Total CSS < 250KB in tests/e2e/performance-css.test.ts
+- [x] T017 [P] Performance test: Critical CSS < 14KB in tests/e2e/performance-critical.test.ts
+- [x] T018 [P] Performance test: Main JS < 100KB in tests/e2e/performance-js.test.ts
+- [x] T018a [P] Performance test: TTI < 3.5s on 3G in tests/e2e/performance-tti.test.ts
+- [x] T018b [P] Performance test: FCP < 1.8s in tests/e2e/performance-fcp.test.ts
+- [x] T018c [P] Performance test: CLS < 0.1 in tests/e2e/performance-cls.test.ts
+- [x] T019 [P] Integration test: @split directive processing in tests/integration/directive-split.test.ts
+- [x] T020 [P] Integration test: @critical directive extraction in tests/integration/directive-critical.test.ts
+- [x] T021 [P] Integration test: Decorator auto-discovery in tests/integration/decorator-discovery.test.ts
+- [x] T022 [P] Integration test: Network-aware loading in tests/integration/network-aware.test.ts
 - [ ] QA-02 Launch QA agent to verify all tests are written and failing (commit with `chore(QA-02): verify phase 3.2 tests`)
 
 ## Phase 3.3: Core Implementation - PostCSS Plugin (ONLY after tests are failing)
 
-- [ ] T023 Implement directive parser for @split in lib/postcss-shopify-directive-splitter/parser.ts (check shopify-dev and context7 for existing parsers)
-- [ ] T024 Implement directive parser for @critical in lib/postcss-shopify-directive-splitter/parser.ts
-- [ ] T025 Implement directive parser for @inline in lib/postcss-shopify-directive-splitter/parser.ts
-- [ ] T026 [P] Implement file generator for CSS splits in lib/postcss-shopify-directive-splitter/generator.ts
-- [ ] T027 [P] Implement Liquid snippet generator in lib/postcss-shopify-directive-splitter/generator.ts (use shopify-dev docs for Liquid best practices)
-- [ ] T028 [P] Implement performance budget checker in lib/postcss-shopify-directive-splitter/budget.ts
-- [ ] T029 Implement directive validation and conflict detection in lib/postcss-shopify-directive-splitter/validator.ts
-- [ ] T030 Implement main plugin with PostCSS API in lib/postcss-shopify-directive-splitter/index.ts
-- [ ] T031 [P] Create content hash generation for cache busting in lib/postcss-shopify-directive-splitter/utils.ts
+- [x] T023 Implement directive parser for @split in lib/postcss-shopify-directive-splitter/parser.ts (check shopify-dev and context7 for existing parsers)
+- [x] T024 Implement directive parser for @critical in lib/postcss-shopify-directive-splitter/parser.ts
+- [x] T025 Implement directive parser for @inline in lib/postcss-shopify-directive-splitter/parser.ts
+- [x] T026 [P] Implement file generator for CSS splits in lib/postcss-shopify-directive-splitter/generator.ts
+- [x] T027 [P] Implement Liquid snippet generator in lib/postcss-shopify-directive-splitter/generator.ts (use shopify-dev docs for Liquid best practices)
+- [x] T028 [P] Implement performance budget checker in lib/postcss-shopify-directive-splitter/budget.ts
+- [x] T029 Implement directive validation and conflict detection in lib/postcss-shopify-directive-splitter/validator.ts
+- [x] T030 Implement main plugin with PostCSS API in lib/postcss-shopify-directive-splitter/index.ts
+- [x] T031 [P] Create content hash generation for cache busting in lib/postcss-shopify-directive-splitter/utils.ts
 - [ ] QA-03 Launch QA agent to verify PostCSS plugin implementation (commit with `chore(QA-03): verify phase 3.3 postcss`)
 
 ## Phase 3.4: Core Implementation - TypeScript Decorators
 
-- [ ] T032 [P] Implement @Template decorator in lib/shopify-decorator-system/decorators/template.ts
-- [ ] T033 [P] Implement @LazyLoad decorator in lib/shopify-decorator-system/decorators/lazyload.ts
-- [ ] T034 [P] Implement @Critical decorator in lib/shopify-decorator-system/decorators/critical.ts
-- [ ] T035 [P] Implement @NetworkAware decorator in lib/shopify-decorator-system/decorators/network-aware.ts
-- [ ] T036 [P] Implement @Debounced method decorator in lib/shopify-decorator-system/decorators/debounced.ts
-- [ ] T037 [P] Implement @Cached method decorator in lib/shopify-decorator-system/decorators/cached.ts
-- [ ] T038 Implement component registry with metadata storage in lib/shopify-decorator-system/registry.ts
-- [ ] T039 Implement component auto-discovery with Vite glob imports in lib/shopify-decorator-system/discovery.ts
-- [ ] T040 [P] Implement loading strategy calculator in lib/shopify-decorator-system/strategies.ts
-- [ ] T041 [P] Implement IntersectionObserver manager for lazy loading in lib/shopify-decorator-system/observer.ts (check Alpine.js for existing observer utilities)
-- [ ] T042 [P] Implement Network Information API wrapper in lib/shopify-decorator-system/network.ts
+- [x] T032 [P] Implement @Template decorator in lib/shopify-decorator-system/decorators/template.ts
+- [x] T033 [P] Implement @LazyLoad decorator in lib/shopify-decorator-system/decorators/lazyload.ts
+- [x] T034 [P] Implement @Critical decorator in lib/shopify-decorator-system/decorators/critical.ts
+- [x] T035 [P] Implement @NetworkAware decorator in lib/shopify-decorator-system/decorators/network-aware.ts
+- [x] T036 [P] Implement @Debounced method decorator in lib/shopify-decorator-system/decorators/debounced.ts
+- [x] T037 [P] Implement @Cached method decorator in lib/shopify-decorator-system/decorators/cached.ts
+- [x] T038 Implement component registry with metadata storage in lib/shopify-decorator-system/registry.ts
+- [x] T039 Implement component auto-discovery with Vite glob imports in lib/shopify-decorator-system/discovery.ts
+- [x] T040 [P] Implement loading strategy calculator in lib/shopify-decorator-system/strategies.ts
+- [x] T041 [P] Implement IntersectionObserver manager for lazy loading in lib/shopify-decorator-system/observer.ts (check Alpine.js for existing observer utilities)
+- [x] T042 [P] Implement Network Information API wrapper in lib/shopify-decorator-system/network.ts
 - [ ] QA-04 Launch QA agent to verify decorator system implementation (commit with `chore(QA-04): verify phase 3.4 decorators`)
 
 ## Phase 3.5: Vite & Build Integration
