@@ -1,0 +1,20 @@
+# Hide Spec Kit output from PR diffs
+specs/** linguist-generated=true
+.specify/scripts/** linguist-vendored=true
+.specify/templates/** linguist-vendored=true
+# Treat all locale JSONs as generated
+locales/*.json linguist-generated=true
+# But keep English ones visible (do not mark as generated)
+locales/en.*.json -linguist-generated
+
+# Docs
+src/docs/** linguist-documentation
+
+# Shopify generated
+templates/*.json linguist-generated=true
+templates/**/*.json linguist-generated=true
+
+# Optional: also mute them in local CLI diffs
+specs/** -diff
+locales/*.json -diff
+locales/en.*.json diff
