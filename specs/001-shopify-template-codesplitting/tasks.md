@@ -100,15 +100,15 @@
 
 ## Phase 3.5: Vite & Build Integration
 
-- [ ] T043 Integrate PostCSS plugin into Vite pipeline in vite.config.ts
-- [ ] T044 Configure vite-plugin-shopify to recognize split CSS files in vite.config.ts (consult shopify-dev for plugin API)
-- [ ] T045 [P] Implement performance budget plugin in lib/vite-plugin-performance-budget/index.ts
-- [ ] T046 Add performance budget enforcement to Vite build in vite.config.ts
-- [ ] T047 Setup HMR for directive changes without full refresh in vite.config.ts
-- [ ] T048 [P] Configure source map generation for split files in vite.config.ts
-- [ ] T048a Configure development-mode source maps in PostCSS pipeline for debugging
-- [ ] T049 [P] Create Vite plugin for Liquid snippet generation in lib/vite-plugin-liquid-snippets/index.ts
-- [ ] T050 Configure asset fingerprinting for cache busting in vite.config.ts
+- [x] T043 Integrate PostCSS plugin into Vite pipeline in vite.config.ts
+- [x] T044 Configure vite-plugin-shopify to recognize split CSS files in vite.config.ts (consult shopify-dev for plugin API)
+- [x] T045 [P] Implement performance budget plugin in lib/vite-plugin-performance-budget/index.ts
+- [x] T046 Add performance budget enforcement to Vite build in vite.config.ts
+- [x] T047 Setup HMR for directive changes without full refresh in vite.config.ts
+- [x] T048 [P] Configure source map generation for split files in vite.config.ts
+- [x] T048a Configure development-mode source maps in PostCSS pipeline for debugging
+- [x] T049 [P] Create Vite plugin for Liquid snippet generation in lib/vite-plugin-liquid-snippets/index.ts
+- [x] T050 Configure asset fingerprinting for cache busting in vite.config.ts
 - [ ] QA-05 Launch QA agent to verify Vite integration (commit with `chore(QA-05): verify phase 3.5 vite`)
 
 ## Phase 3.6: Shopify Theme Integration
