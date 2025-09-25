@@ -306,12 +306,12 @@ test.describe('Critical CSS Performance Tests (T017)', () => {
       const criticalStyles = await extractRuntimeCriticalCSS(page, 'http://127.0.0.1:9292/')
 
       const totalInlineSize = criticalStyles
-        .filter(s => s.source === 'inline')
-        .reduce((sum, s) => sum + s.size, 0)
+        .filter((s: any) => s.source === 'inline')
+        .reduce((sum: number, s: any) => sum + s.size, 0)
 
       console.log('Homepage Critical CSS Delivery:', {
-        inlineStyles: criticalStyles.filter(s => s.source === 'inline').length,
-        externalCritical: criticalStyles.filter(s => s.source === 'external').length,
+        inlineStyles: criticalStyles.filter((s: any) => s.source === 'inline').length,
+        externalCritical: criticalStyles.filter((s: any) => s.source === 'external').length,
         totalInlineSizeKB: Math.round(totalInlineSize / 1024),
         budgetKB: Math.round(CRITICAL_CSS_BUDGETS.MAX_BYTES / 1024)
       })
@@ -323,8 +323,8 @@ test.describe('Critical CSS Performance Tests (T017)', () => {
       const criticalStyles = await extractRuntimeCriticalCSS(page, 'http://127.0.0.1:9292/products/sample-product')
 
       const totalInlineSize = criticalStyles
-        .filter(s => s.source === 'inline')
-        .reduce((sum, s) => sum + s.size, 0)
+        .filter((s: any) => s.source === 'inline')
+        .reduce((sum: number, s: any) => sum + s.size, 0)
 
       expect(totalInlineSize).toBeLessThan(CRITICAL_CSS_BUDGETS.MAX_BYTES)
     })
@@ -333,8 +333,8 @@ test.describe('Critical CSS Performance Tests (T017)', () => {
       const criticalStyles = await extractRuntimeCriticalCSS(page, 'http://127.0.0.1:9292/collections/all')
 
       const totalInlineSize = criticalStyles
-        .filter(s => s.source === 'inline')
-        .reduce((sum, s) => sum + s.size, 0)
+        .filter((s: any) => s.source === 'inline')
+        .reduce((sum: number, s: any) => sum + s.size, 0)
 
       expect(totalInlineSize).toBeLessThan(CRITICAL_CSS_BUDGETS.MAX_BYTES)
     })
@@ -343,8 +343,8 @@ test.describe('Critical CSS Performance Tests (T017)', () => {
       const criticalStyles = await extractRuntimeCriticalCSS(page, 'http://127.0.0.1:9292/cart')
 
       const totalInlineSize = criticalStyles
-        .filter(s => s.source === 'inline')
-        .reduce((sum, s) => sum + s.size, 0)
+        .filter((s: any) => s.source === 'inline')
+        .reduce((sum: number, s: any) => sum + s.size, 0)
 
       expect(totalInlineSize).toBeLessThan(CRITICAL_CSS_BUDGETS.MAX_BYTES)
     })

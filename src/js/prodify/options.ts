@@ -1,6 +1,6 @@
 import { OPTION_CONTAINER_SELECTOR } from './const'
 
-function maybeSetOptionSelected(select) {
+function maybeSetOptionSelected(select: HTMLSelectElement) {
   if (window.prodify.pickerType == 'select') {
     const options = Array.from(select.querySelectorAll('option'))
     const currentValue = select.value
@@ -23,7 +23,8 @@ function updateCurrentOptions() {
 
   window.prodify.optionContainers = Array.from(window.prodify.el.querySelectorAll(OPTION_CONTAINER_SELECTOR))
   window.prodify.options = window.prodify.optionContainers.map((optionContainer) => {
-    return (Array.from(optionContainer.querySelectorAll('input')).find((radio: HTMLInputElement) => radio.checked) as HTMLInputElement).value
+    const checkedInput = Array.from(optionContainer.querySelectorAll('input')).find((radio: HTMLInputElement) => radio.checked) as HTMLInputElement | undefined
+    return checkedInput ? checkedInput.value : ''
   })
 }
 

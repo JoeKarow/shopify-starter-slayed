@@ -40,7 +40,7 @@ export function Template(
       decorators: [
         {
           type: 'Template' as const,
-          parameters: Array.isArray(options) ? options : options
+          parameters: Array.isArray(options) ? { templates: options } : options
         }
       ],
       instance: new constructor()

@@ -22,7 +22,7 @@ const CLS_BUDGETS = {
 
 // Helper to measure CLS and related layout metrics
 async function measureCLS(page: any, duration: number = 5000) {
-  return await page.evaluate((measurementDuration) => {
+  return await page.evaluate((measurementDuration: number) => {
     return new Promise((resolve) => {
       let cls = 0
       let clsEntries: any[] = []
@@ -31,8 +31,8 @@ async function measureCLS(page: any, duration: number = 5000) {
 
       // Try to use web-vitals library if available
       if ((window as any).webVitals) {
-        import('web-vitals').then(({ getCLS }) => {
-          getCLS((metric) => {
+        import('web-vitals').then((webVitals: any) => {
+          webVitals.onCLS((metric: any) => {
             cls = metric.value
             clsEntries = metric.entries
             resolve({
@@ -151,7 +151,7 @@ test.describe('CLS Performance Tests (T018c)', () => {
         cls: clsMetrics.cls.toFixed(3),
         budget: CLS_BUDGETS.GOOD.toFixed(3),
         layoutShifts: clsMetrics.sessionEntries,
-        shifts: clsMetrics.clsEntries.map(entry => ({
+        shifts: clsMetrics.clsEntries.map((entry: any) => ({
           value: entry.value?.toFixed(3),
           time: `${Math.round(entry.startTime)}ms`,
           element: entry.sources?.[0]?.element || 'unknown'
@@ -251,13 +251,13 @@ test.describe('CLS Performance Tests (T018c)', () => {
         cls: clsMetrics.cls.toFixed(3),
         totalShifts: clsMetrics.sessionEntries,
         budget: CLS_BUDGETS.GOOD.toFixed(3),
-        majorShifts: clsMetrics.clsEntries.filter(entry => entry.value > 0.01).length
+        majorShifts: clsMetrics.clsEntries.filter((entry: any) => entry.value > 0.01).length
       })
 
       expect(clsMetrics.cls).toBeLessThan(CLS_BUDGETS.GOOD)
 
       // Should have minimal major layout shifts
-      const majorShifts = clsMetrics.clsEntries.filter(entry => entry.value > 0.01)
+      const majorShifts = clsMetrics.clsEntries.filter((entry: any) => entry.value > 0.01)
       expect(majorShifts.length).toBeLessThan(3)
     })
 
@@ -283,7 +283,7 @@ test.describe('CLS Performance Tests (T018c)', () => {
 
       console.log('CLS During Image Loading:', {
         cls: clsMetrics.cls.toFixed(3),
-        imageShifts: clsMetrics.clsEntries.filter(entry =>
+        imageShifts: clsMetrics.clsEntries.filter((entry: any) =>
           entry.sources?.some((source: any) => source.element === 'IMG')).length
       })
 
@@ -377,7 +377,7 @@ test.describe('CLS Performance Tests (T018c)', () => {
                 const rule = rules[i]
                 if (rule.type === CSSRule.FONT_FACE_RULE) {
                   const fontFaceRule = rule as CSSFontFaceRule
-                  if (fontFaceRule.style.fontDisplay) {
+                  if ((fontFaceRule.style as any).fontDisplay) {
                     fontLoadingStrategies.fontDisplay++
                   }
                 }

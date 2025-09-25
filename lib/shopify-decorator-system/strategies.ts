@@ -43,14 +43,13 @@ export function calculateLoadingStrategy(
   }
 
   // Check template matching
-  if (templateDecorator) {
-    const templates = Array.isArray(templateDecorator.parameters)
-      ? templateDecorator.parameters
-      : templateDecorator.parameters?.templates === '*'
-        ? ['*']
-        : Array.isArray(templateDecorator.parameters?.templates)
-          ? templateDecorator.parameters.templates
-          : [templateDecorator.parameters?.templates]
+  if (templateDecorator && templateDecorator.type === 'Template') {
+    const params = templateDecorator.parameters as import('./decorators/template.js').TemplateDecoratorOptions
+    const templates = params.templates === '*'
+      ? ['*']
+      : Array.isArray(params.templates)
+        ? params.templates
+        : [params.templates as string]
 
     // Skip if not on matching template
     if (!templates.includes(context.template) && !templates.includes('*')) {
@@ -234,14 +233,13 @@ export function calculatePriority(
 
   // Template-specific components get higher priority on matching templates
   const templateDecorator = decorators.find(d => d.type === 'Template')
-  if (templateDecorator) {
-    const templates = Array.isArray(templateDecorator.parameters)
-      ? templateDecorator.parameters
-      : templateDecorator.parameters?.templates === '*'
-        ? ['*']
-        : Array.isArray(templateDecorator.parameters?.templates)
-          ? templateDecorator.parameters.templates
-          : [templateDecorator.parameters?.templates]
+  if (templateDecorator && templateDecorator.type === 'Template') {
+    const params = templateDecorator.parameters as import('./decorators/template.js').TemplateDecoratorOptions
+    const templates = params.templates === '*'
+      ? ['*']
+      : Array.isArray(params.templates)
+        ? params.templates
+        : [params.templates as string]
 
     if (templates.includes(context.template) || templates.includes('*')) {
       priority -= 2 // Higher priority for matching templates

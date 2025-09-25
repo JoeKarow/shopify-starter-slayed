@@ -6,6 +6,7 @@
  */
 
 import directiveSplitter from './lib/postcss-shopify-directive-splitter/index.js'
+// @ts-ignore - TailwindCSS PostCSS plugin
 import tailwindcss from '@tailwindcss/postcss'
 import autoprefixer from 'autoprefixer'
 import cssnano from 'cssnano'
