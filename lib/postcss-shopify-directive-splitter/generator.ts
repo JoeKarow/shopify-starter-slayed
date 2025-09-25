@@ -1,138 +1,313 @@
 /**
- * CSS Split Generator
+ * CSS File and Liquid Snippet Generator
  *
- * Generates template-specific CSS files from parsed directives
+ * Generates template-specific CSS files and Liquid snippets from processed directives
  */
 
 import { promises as fs } from 'fs'
 import path from 'path'
-import { DirectiveNode, SplitResult, groupDirectivesByTemplate } from './parser.js'
-import type { DirectiveSplitterOptions } from './index.js'
+import type { ProcessedDirective, GeneratedFile, DirectiveSplitterOptions } from '../../specs/001-shopify-template-codesplitting/contracts/postcss-plugin'
+import { generateContentHash, generateSplitFilePath, generateCriticalFilePath, generateSnippetFilePath, minifyCSS } from './utils'
 
 /**
- * Generate CSS splits from parsed directives
+ * Generate files from processed directives
  */
-export async function generateSplits(
-  directives: DirectiveNode[],
-  options: Required<DirectiveSplitterOptions>
-): Promise<SplitResult[]> {
-  const splits: SplitResult[] = []
-  const grouped = groupDirectivesByTemplate(directives)
+export function generateFiles(
+  directives: ProcessedDirective[],
+  options: DirectiveSplitterOptions
+): GeneratedFile[] {
+  const files: GeneratedFile[] = []
 
-  // Ensure output directory exists
-  await ensureOutputDirectory(options.outputDir)
+  // Group directives by type and target
+  const groupedDirectives = groupDirectivesByTypeAndTarget(directives)
 
-  for (const [template, templateDirectives] of grouped) {
-    if (template === 'global') {
-      // Handle global directives (critical, inline)
-      const globalSplits = await generateGlobalSplits(templateDirectives, options)
-      splits.push(...globalSplits)
-    } else {
-      // Handle template-specific splits
-      const templateSplit = await generateTemplateSplit(template, templateDirectives, options)
-      if (templateSplit) {
-        splits.push(templateSplit)
-      }
+  // Generate CSS split files
+  for (const [template, splitDirectives] of groupedDirectives.split) {
+    const file = generateSplitFile(template, splitDirectives, options)
+    if (file) {
+      files.push(file)
     }
   }
 
-  // Validate against budgets
-  validateBudgets(splits, options.budgets)
+  // Generate critical CSS files
+  for (const [target, criticalDirectives] of groupedDirectives.critical) {
+    const file = generateCriticalFile(target, criticalDirectives, options)
+    if (file) {
+      files.push(file)
+    }
+  }
 
-  return splits
+  // Generate inline CSS liquid snippets
+  for (const [target, inlineDirectives] of groupedDirectives.inline) {
+    const file = generateInlineSnippet(target, inlineDirectives, options)
+    if (file) {
+      files.push(file)
+    }
+  }
+
+  // Generate responsive CSS files (treated similar to splits)
+  for (const [target, responsiveDirectives] of groupedDirectives.responsive) {
+    const file = generateResponsiveFile(target, responsiveDirectives, options)
+    if (file) {
+      files.push(file)
+    }
+  }
+
+  return files
 }
 
 /**
- * Generate global CSS splits (critical, inline)
+ * Group directives by type and target
  */
-async function generateGlobalSplits(
-  directives: DirectiveNode[],
-  options: Required<DirectiveSplitterOptions>
-): Promise<SplitResult[]> {
-  const splits: SplitResult[] = []
+function groupDirectivesByTypeAndTarget(directives: ProcessedDirective[]) {
+  const grouped = {
+    split: new Map<string, ProcessedDirective[]>(),
+    critical: new Map<string, ProcessedDirective[]>(),
+    inline: new Map<string, ProcessedDirective[]>(),
+    responsive: new Map<string, ProcessedDirective[]>()
+  }
 
   for (const directive of directives) {
-    if (directive.type === 'critical') {
-      const css = directive.rules.join('\n')
-      const split: SplitResult = {
-        template: 'critical',
-        css,
-        size: Buffer.byteLength(css, 'utf8'),
-        critical: true,
-      }
+    const target = directive.target || 'global'
+    const map = grouped[directive.type]
 
-      splits.push(split)
-
-      // Write critical CSS to file
-      const filePath = path.join(options.outputDir, 'critical.css')
-      await fs.writeFile(filePath, css, 'utf8')
-
-      if (options.verbose) {
-        console.log(`Generated critical.css (${formatSize(split.size)})`)
-      }
+    if (!map.has(target)) {
+      map.set(target, [])
     }
-
-    if (directive.type === 'inline') {
-      const css = directive.rules.join('\n')
-      const componentName = directive.params?.[0] || 'inline'
-
-      const split: SplitResult = {
-        template: componentName,
-        css,
-        size: Buffer.byteLength(css, 'utf8'),
-        inline: true,
-      }
-
-      splits.push(split)
-
-      // Inline CSS is typically embedded, not written to file
-      if (options.verbose) {
-        console.log(`Generated inline CSS for ${componentName} (${formatSize(split.size)})`)
-      }
-    }
+    map.get(target)!.push(directive)
   }
 
-  return splits
+  return grouped
 }
 
 /**
- * Generate template-specific CSS split
+ * Generate CSS split file for template-specific styles
  */
-async function generateTemplateSplit(
+function generateSplitFile(
   template: string,
-  directives: DirectiveNode[],
-  options: Required<DirectiveSplitterOptions>
-): Promise<SplitResult | null> {
-  const css = directives
-    .flatMap(d => d.rules)
-    .join('\n')
+  directives: ProcessedDirective[],
+  options: DirectiveSplitterOptions
+): GeneratedFile | null {
+  if (directives.length === 0) return null
 
-  if (!css.trim()) {
-    return null
-  }
+  // Combine all CSS content for this template
+  const cssContent = directives.map(d => d.content).join('\n\n')
 
-  const split: SplitResult = {
+  if (!cssContent.trim()) return null
+
+  // Apply minification if enabled
+  const processedContent = options.minify ? minifyCSS(cssContent) : cssContent
+
+  const filePath = generateSplitFilePath(options.themeRoot, options.entrypointsDir, template)
+  const size = Buffer.byteLength(processedContent, 'utf8')
+  const hash = generateContentHash(processedContent)
+
+  return {
+    path: filePath,
+    content: processedContent,
+    type: 'css-split',
     template,
-    css,
-    size: Buffer.byteLength(css, 'utf8'),
+    size,
+    hash
+  }
+}
+
+/**
+ * Generate critical CSS file
+ */
+function generateCriticalFile(
+  target: string,
+  directives: ProcessedDirective[],
+  options: DirectiveSplitterOptions
+): GeneratedFile | null {
+  if (directives.length === 0) return null
+
+  // Combine all critical CSS content
+  const cssContent = directives.map(d => d.content).join('\n\n')
+
+  if (!cssContent.trim()) return null
+
+  // Apply minification if enabled
+  const processedContent = options.minify ? minifyCSS(cssContent) : cssContent
+
+  const filePath = generateCriticalFilePath(options.themeRoot, options.entrypointsDir, target)
+  const size = Buffer.byteLength(processedContent, 'utf8')
+  const hash = generateContentHash(processedContent)
+
+  return {
+    path: filePath,
+    content: processedContent,
+    type: 'critical-css',
+    template: target,
+    size,
+    hash
+  }
+}
+
+/**
+ * Generate inline CSS Liquid snippet
+ */
+function generateInlineSnippet(
+  target: string,
+  directives: ProcessedDirective[],
+  options: DirectiveSplitterOptions
+): GeneratedFile | null {
+  if (directives.length === 0) return null
+
+  // Combine all inline CSS content
+  const cssContent = directives.map(d => d.content).join('\n\n')
+
+  if (!cssContent.trim()) return null
+
+  // Apply minification if enabled
+  const processedCSS = options.minify ? minifyCSS(cssContent) : cssContent
+
+  // Check if any directive has lazy loading
+  const hasLazy = directives.some(d => d.options?.lazy)
+  const isScoped = directives.some(d => d.options?.scoped)
+
+  // Generate Liquid snippet content
+  const liquidContent = createLiquidSnippet(target, processedCSS, {
+    lazy: hasLazy,
+    scoped: isScoped,
+    generateViteTags: options.generateViteTags
+  })
+
+  const filePath = generateSnippetFilePath(options.themeRoot, target)
+  const size = Buffer.byteLength(liquidContent, 'utf8')
+  const hash = generateContentHash(liquidContent)
+
+  return {
+    path: filePath,
+    content: liquidContent,
+    type: 'liquid-snippet',
+    template: undefined, // Snippets are not template-specific
+    size,
+    hash
+  }
+}
+
+/**
+ * Generate responsive CSS file
+ */
+function generateResponsiveFile(
+  target: string,
+  directives: ProcessedDirective[],
+  options: DirectiveSplitterOptions
+): GeneratedFile | null {
+  if (directives.length === 0) return null
+
+  // Combine all responsive CSS content
+  const cssContent = directives.map(d => d.content).join('\n\n')
+
+  if (!cssContent.trim()) return null
+
+  // Apply minification if enabled
+  const processedContent = options.minify ? minifyCSS(cssContent) : cssContent
+
+  // Use similar path structure to splits but with responsive prefix
+  const fileName = `responsive-${target}-css.liquid`
+  const filePath = path.join(options.themeRoot, options.entrypointsDir, 'splits', fileName)
+  const size = Buffer.byteLength(processedContent, 'utf8')
+  const hash = generateContentHash(processedContent)
+
+  return {
+    path: filePath,
+    content: processedContent,
+    type: 'css-split', // Treat responsive as split for now
+    template: target,
+    size,
+    hash
+  }
+}
+
+/**
+ * Create Liquid snippet for inline CSS
+ */
+export function createLiquidSnippet(
+  target: string,
+  css: string,
+  options: {
+    lazy?: boolean
+    scoped?: boolean
+    generateViteTags?: boolean
+  } = {}
+): string {
+  const lines: string[] = []
+
+  lines.push(`{%- comment -%}`)
+  lines.push(`  Inline CSS for ${target}`)
+  lines.push(`  Generated by postcss-shopify-directive-splitter`)
+  lines.push(`  Hash: ${generateContentHash(css)}`)
+  lines.push(`{%- endcomment -%}`)
+  lines.push('')
+
+  if (options.lazy) {
+    // Lazy loading implementation
+    lines.push(`{%- unless ${target}_css_loaded -%}`)
+    lines.push(`  {%- assign ${target}_css_loaded = true -%}`)
+    lines.push(`  <style data-target="${target}" loading="lazy">`)
+  } else {
+    // Immediate loading
+    lines.push(`<style data-target="${target}">`)
   }
 
-  // Write template CSS to file
-  const fileName = `${template}.css`
-  const filePath = path.join(options.outputDir, fileName)
-  await fs.writeFile(filePath, css, 'utf8')
-
-  if (options.verbose) {
-    console.log(`Generated ${fileName} (${formatSize(split.size)})`)
+  if (options.scoped) {
+    // Scope CSS to specific container
+    lines.push(`  /* Scoped styles for ${target} */`)
+    const scopedCSS = scopeCSSToTarget(css, target)
+    lines.push(`  ${scopedCSS}`)
+  } else {
+    lines.push(`  ${css}`)
   }
 
-  return split
+  lines.push(`</style>`)
+
+  if (options.lazy) {
+    lines.push(`{%- endunless -%}`)
+  }
+
+  if (options.generateViteTags) {
+    lines.push('')
+    lines.push(`{%- comment -%} Vite HMR support {%- endcomment -%}`)
+    lines.push(`{%- if settings.vite_dev_mode -%}`)
+    lines.push(`  <!-- vite-hmr:${target} -->`)
+    lines.push(`{%- endif -%}`)
+  }
+
+  return lines.join('\n')
+}
+
+/**
+ * Scope CSS selectors to a specific target
+ */
+function scopeCSSToTarget(css: string, target: string): string {
+  // Simple scoping - prefix selectors with target class
+  return css.replace(
+    /([^{}]+)\s*{/g,
+    (match, selector) => {
+      const trimmedSelector = selector.trim()
+
+      // Don't scope media queries, keyframes, or other at-rules
+      if (trimmedSelector.startsWith('@')) {
+        return match
+      }
+
+      // Don't scope if already scoped
+      if (trimmedSelector.includes(`.${target}`)) {
+        return match
+      }
+
+      // Add scoping
+      return `.${target} ${trimmedSelector} {`
+    }
+  )
 }
 
 /**
  * Ensure output directory exists
  */
-async function ensureOutputDirectory(outputDir: string): Promise<void> {
+export async function ensureOutputDirectory(outputDir: string): Promise<void> {
   try {
     await fs.access(outputDir)
   } catch {
@@ -141,60 +316,30 @@ async function ensureOutputDirectory(outputDir: string): Promise<void> {
 }
 
 /**
- * Validate CSS splits against performance budgets
+ * Write files to disk
  */
-function validateBudgets(splits: SplitResult[], budgets: Required<DirectiveSplitterOptions>['budgets']): void {
-  // Validate critical CSS budget
-  const criticalSplits = splits.filter(s => s.critical)
-  const criticalSize = criticalSplits.reduce((sum, s) => sum + s.size, 0)
+export async function writeGeneratedFiles(files: GeneratedFile[]): Promise<void> {
+  for (const file of files) {
+    // Ensure directory exists
+    const dir = path.dirname(file.path)
+    await ensureOutputDirectory(dir)
 
-  if (criticalSize > budgets.critical) {
-    console.warn(
-      `Critical CSS budget exceeded: ${formatSize(criticalSize)} > ${formatSize(budgets.critical)}`
-    )
-  }
-
-  // Validate individual template budgets
-  const templateSplits = splits.filter(s => !s.critical && !s.inline)
-  for (const split of templateSplits) {
-    if (split.size > budgets.template) {
-      console.warn(
-        `Template CSS budget exceeded for ${split.template}: ${formatSize(split.size)} > ${formatSize(budgets.template)}`
-      )
-    }
-  }
-
-  // Validate total CSS budget
-  const totalSize = splits.reduce((sum, s) => sum + s.size, 0)
-  if (totalSize > budgets.total) {
-    console.warn(
-      `Total CSS budget exceeded: ${formatSize(totalSize)} > ${formatSize(budgets.total)}`
-    )
+    // Write file
+    await fs.writeFile(file.path, file.content, 'utf8')
   }
 }
 
 /**
- * Format byte size for display
+ * Generate manifest of all generated files
  */
-function formatSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes}B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`
-}
+export function generateManifest(files: GeneratedFile[]): Record<string, string> {
+  const manifest: Record<string, string> = {}
 
-/**
- * Get template-specific CSS import path
- */
-export function getTemplateImportPath(template: string): string {
-  return `./splits/${template}.css`
-}
+  for (const file of files) {
+    const relativePath = file.path.split('/').slice(-3).join('/')
+    const key = file.template ? `${file.template}-${file.type}` : file.type
+    manifest[key] = relativePath
+  }
 
-/**
- * Generate CSS import statements for templates
- */
-export function generateImportStatements(splits: SplitResult[]): string {
-  return splits
-    .filter(s => !s.critical && !s.inline)
-    .map(s => `@import "${getTemplateImportPath(s.template)}";`)
-    .join('\n')
+  return manifest
 }
