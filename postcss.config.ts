@@ -51,4 +51,6 @@ export default {
       }),
     ] : []),
   ],
+  // Global PostCSS source map configuration for development
+  map: process.env.NODE_ENV === 'development' ? { inline: true } : false,
 }
