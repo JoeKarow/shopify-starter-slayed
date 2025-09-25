@@ -1,0 +1,81 @@
+# Mise configuration example for Shopify Template Codesplitting
+# Copy to project root as .mise.toml
+
+[tools]
+node = "20.11.0"
+bun = "1.1.0"
+
+[tasks."vite:build"]
+description = "Build assets with Vite"
+run = "bun run vite build"
+
+[tasks."check-budgets"]
+description = "Verify performance budgets"
+run = "node lib/vite-plugin-performance-budget/check.js"
+
+[tasks.build]
+description = "Build production assets with performance budget checks"
+depends = ["vite:build", "check-budgets"]
+
+[tasks."vite:dev"]
+description = "Start Vite dev server"
+run = "bun run vite dev"
+wait_for = "port:3000"
+
+[tasks."shopify:dev"]
+description = "Start Shopify theme dev"
+run = "bun run shopify theme dev"
+wait_for = "port:9292"
+
+[tasks.dev]
+description = "Start development server with HMR"
+depends = ["vite:dev", "shopify:dev"]
+
+[tasks.test]
+description = "Run all tests"
+depends = ["test:unit", "test:integration", "test:e2e"]
+
+[tasks."test:unit:postcss"]
+description = "Test PostCSS plugin"
+run = "bun test lib/postcss-shopify-directive-splitter/test"
+
+[tasks."test:unit:decorators"]
+description = "Test decorator system"
+run = "bun test lib/shopify-decorator-system/test"
+
+[tasks."test:unit:budget"]
+description = "Test performance budget plugin"
+run = "bun test lib/vite-plugin-performance-budget/test"
+
+[tasks."test:unit"]
+description = "Run unit tests for plugins"
+depends = ["test:unit:postcss", "test:unit:decorators", "test:unit:budget"]
+
+[tasks."test:integration"]
+description = "Run integration tests"
+run = "bun test tests/integration"
+
+[tasks."test:e2e"]
+description = "Run E2E tests with Playwright"
+run = "bun run playwright test"
+
+[tasks."check-budgets"]
+description = "Verify performance budgets"
+run = "node lib/vite-plugin-performance-budget/check.js"
+
+[tasks."lint:scss"]
+description = "Lint SCSS files"
+run = "stylelint 'frontend/**/*.scss'"
+
+[tasks."analyze"]
+description = "Analyze bundle sizes"
+run = "bun run vite-bundle-visualizer"
+
+[tasks."lighthouse"]
+description = "Run Lighthouse performance tests"
+run = "lighthouse http://127.0.0.1:9292 --budget-path=.lighthouse/budget.json"
+
+[env]
+NODE_ENV = "development"
+SHOPIFY_FLAG_STORE = { source = ".env" }
+SHOPIFY_CLI_THEME_TOKEN = { source = ".env" }

@@ -1,0 +1,103 @@
+{% comment %}
+  Analytics Endpoint Integration for Shopify
+  T078: Configure RUM data reporting to analytics endpoint
+
+  This snippet provides server-side handling for RUM data collection
+  when hosting analytics endpoint on the same domain as the Shopify store.
+{% endcomment %}
+
+{% if request.path == '/analytics/performance' %}
+  {% comment %}
+    Handle analytics POST requests
+    This is a simplified server-side handler for demonstration
+    In production, you'd use a proper backend service
+  {% endcomment %}
+
+  {% if request.method == 'POST' %}
+    {% assign analytics_enabled = true %}
+    {% assign max_payload_size = 1048576 %} {% comment %} 1MB {% endcomment %}
+
+    {% if analytics_enabled %}
+      {% comment %}
+        In a real implementation, you would:
+        1. Parse the JSON payload from request body
+        2. Validate the data structure
+        3. Store metrics in a database
+        4. Forward to external analytics services
+        5. Return appropriate response
+
+        For Shopify themes, you'd typically proxy this to an external service
+        since Liquid doesn't have direct database access or HTTP client capabilities
+      {% endcomment %}
+
+      {% comment %} Success response {% endcomment %}
+      Status: 200
+      Content-Type: application/json
+      Access-Control-Allow-Origin: *
+      Access-Control-Allow-Methods: POST, OPTIONS
+      Access-Control-Allow-Headers: Content-Type
+
+      {"success": true, "message": "Metrics received"}
+    {% else %}
+      {% comment %} Analytics disabled {% endcomment %}
+      Status: 503
+      Content-Type: application/json
+
+      {"error": "Analytics collection disabled"}
+    {% endif %}
+
+  {% elsif request.method == 'OPTIONS' %}
+    {% comment %} CORS preflight response {% endcomment %}
+    Status: 204
+    Access-Control-Allow-Origin: *
+    Access-Control-Allow-Methods: POST, OPTIONS
+    Access-Control-Allow-Headers: Content-Type
+
+  {% else %}
+    {% comment %} Method not allowed {% endcomment %}
+    Status: 405
+    Content-Type: application/json
+
+    {"error": "Method not allowed"}
+  {% endif %}
+
+{% else %}
+  {% comment %}
+    If this snippet is included in a regular page, provide configuration
+    for the frontend RUM collection system
+  {% endcomment %}
+
+  <script>
+    window.ANALYTICS_CONFIG = {
+      endpoint: '/analytics/performance',
+      enabled: true,
+      debug: {{ settings.enable_analytics_debug | default: false }},
+      sampleRate: {{ settings.analytics_sample_rate | default: 0.1 }},
+      metadata: {
+        shop: {{ shop.permanent_domain | json }},
+        theme: {
+          name: {{ theme.name | json }},
+          version: '{{ theme.version | default: "1.0.0" }}'
+        },
+        currency: {{ cart.currency.iso_code | json }},
+        locale: {{ request.locale.iso_code | json }},
+        customer: {
+          id: {% if customer %}{{ customer.id }}{% else %}null{% endif %},
+          logged_in: {{ customer != null }}
+        },
+        template: {{ template.name | json }},
+        page: {
+          id: {% if page.id %}{{ page.id }}{% elsif product.id %}{{ product.id }}{% elsif collection.id %}{{ collection.id }}{% elsif article.id %}{{ article.id }}{% else %}null{% endif %},
+          type: {{ template.name | json }},
+          title: {{ page_title | json }}
+        }
+      }
+    };
+
+    // Initialize RUM collection when module loads
+    if (typeof window.RUM !== 'undefined') {
+      window.RUM.updateConfig(window.ANALYTICS_CONFIG);
+    }
+  </script>
+
+{% endif %}

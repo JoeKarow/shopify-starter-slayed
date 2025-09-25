@@ -1,0 +1,2 @@
+# This file ensures the splits/ directory is tracked by Git
+# Generated CSS files will be created here by the PostCSS directive splitter

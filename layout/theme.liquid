@@ -23,6 +23,19 @@
     <!-- header hook for Shopify plugins -->
     {{ content_for_header }}
 
+    {%- comment -%} Critical CSS: Load before any other stylesheets for optimal performance {%- endcomment -%}
+    {% render 'css-critical' %}
+
+    {%- comment -%} Template-specific critical CSS {%- endcomment -%}
+    {% case template.name %}
+      {% when 'product' %}
+        {% render 'css-critical', template: 'product' %}
+      {% when 'collection' %}
+        {% render 'css-critical', template: 'collection' %}
+      {% when 'cart' %}
+        {% render 'css-critical', template: 'cart' %}
+    {% endcase %}
+
     {% render 'head-css' %}
     {% render 'head-scripts' %}
 

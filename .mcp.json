@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "shopify-dev": {
+      "type": "stdio",
+      "command": "bunx",
+      "args": [
+        "@shopify/dev-mcp@latest"
+      ],
+      "env": {}
+    }
+  }
+}

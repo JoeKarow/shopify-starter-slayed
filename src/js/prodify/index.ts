@@ -23,7 +23,7 @@ import {
   compareInputValues
 } from './helpers'
 
-const el: HTMLElement = document.querySelector(`[${DATA_ATTR_PREFIX}]`)
+const el: HTMLElement | null = document.querySelector(`[${DATA_ATTR_PREFIX}]`)
 
 if (!('prodify' in window) && el) {
   const pickerType: "select" | "radio" = el.dataset.prodify as "select" | "radio"

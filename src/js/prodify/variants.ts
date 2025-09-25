@@ -13,21 +13,23 @@ import {
 
 function updateCurrentVariant() {
   const variants = getVariantData()
+  if (!variants || !window.prodify.options) return
+
   const matchingVariant = variants.find(
     variant => {
       return variant.options.every((option, index) => {
-        return window.prodify.options[index] === option
+        return window.prodify.options?.[index] === option
       })
     })
   window.prodify.currentVariant = matchingVariant
 }
 
-function onVariantChange(event) {
+function onVariantChange(event: Event) {
   updateCurrentOptions()
   updateCurrentVariant()
   updateDomAddButton(true, '', false)
   compareInputValues()
-  maybeSetOptionSelected(event.target)
+  if (event.target) maybeSetOptionSelected(event.target as HTMLSelectElement)
 
   if (!window.prodify.currentVariant) {
     updateDomAddButton(true, ADD_BUTTON_TEXT_UNAVAILABLE_STRING, true)
@@ -39,11 +41,17 @@ function onVariantChange(event) {
 }
 
 function getVariantData() {
-  window.prodify.variantData = window.prodify.variantData
-    || JSON.parse(
-      window.prodify.el.querySelector(VARIANTS_JSON_SELECTOR).textContent
-    )
-  return window.prodify.variantData
+  if (window.prodify.variantData) {
+    return window.prodify.variantData
+  }
+
+  const variantScript = window.prodify.el.querySelector(VARIANTS_JSON_SELECTOR) as HTMLScriptElement
+  if (variantScript && variantScript.textContent) {
+    window.prodify.variantData = JSON.parse(variantScript.textContent)
+    return window.prodify.variantData
+  }
+
+  return []
 }
 
 export {

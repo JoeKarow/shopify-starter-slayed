@@ -12,10 +12,10 @@ import {
 } from './variants'
 
 function initEventListeners() {
-  window.prodify.quantityIncrementButton = window.prodify.el.querySelector(QUANTITY_INCREMENT_SELECTOR)
-  window.prodify.quantityDecrementButton = window.prodify.el.querySelector(QUANTITY_DECREMENT_SELECTOR)
-  window.prodify.quantityPresentationInput = window.prodify.el.querySelector(QUANTITY_PRESENTATION_SELECTOR)
-  window.prodify.quantityHiddenInput = window.prodify.el.querySelector(QUANTITY_HIDDEN_INPUT_SELECTOR)
+  window.prodify.quantityIncrementButton = window.prodify.el.querySelector(QUANTITY_INCREMENT_SELECTOR) as HTMLElement | undefined
+  window.prodify.quantityDecrementButton = window.prodify.el.querySelector(QUANTITY_DECREMENT_SELECTOR) as HTMLElement | undefined
+  window.prodify.quantityPresentationInput = window.prodify.el.querySelector(QUANTITY_PRESENTATION_SELECTOR) as HTMLInputElement | undefined
+  window.prodify.quantityHiddenInput = window.prodify.el.querySelector(QUANTITY_HIDDEN_INPUT_SELECTOR) as HTMLInputElement | undefined
   
   window.prodify.el.addEventListener('change', onVariantChange)
 

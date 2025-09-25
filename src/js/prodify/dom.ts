@@ -8,22 +8,22 @@ import {
 } from './const'
 import { fetchHTML } from './helpers'
 
-function updateDomAddButton(disable = true, text, modifyClass = true) {
+function updateDomAddButton(disable = true, text?: string, modifyClass = true) {
   const productForm = document.querySelector(PRODUCT_FORM_SELECTOR)
   
   if (!productForm) return
 
   const addButton = productForm.querySelector('[name="add"]')
-  const addButtonText = productForm.querySelector('[name="add"] > span')
+  const addButtonText = productForm.querySelector('[name="add"] > span') as HTMLElement | null
 
   if (!addButton) return
 
   if (disable) {
     addButton.setAttribute('disabled', 'disabled')
-    if (text) addButtonText.textContent = text
+    if (text && addButtonText) addButtonText.textContent = text
   } else {
     addButton.removeAttribute('disabled')
-    addButtonText.textContent = ADD_BUTTON_TEXT_UNAVAILABLE_STRING
+    if (addButtonText) addButtonText.textContent = ADD_BUTTON_TEXT_UNAVAILABLE_STRING
   }
 
   if (!modifyClass) return
@@ -38,36 +38,44 @@ function updateDomAddButton(disable = true, text, modifyClass = true) {
 function updateVariantIdInput() {
   const productForms = document.querySelectorAll(PRODUCT_FORM_SELECTOR)
   productForms.forEach((productForm) => {
-    const input: HTMLInputElement = productForm.querySelector('input[name="id"]')
-    input.value = (window.prodify.currentVariant.id) as unknown as string
+    const input = productForm.querySelector('input[name="id"]') as HTMLInputElement
+    if (input && window.prodify.currentVariant) {
+      input.value = window.prodify.currentVariant.id.toString()
+    }
     // input.dispatchEvent(new Event('change', { bubbles: true }));
   })
 }
 
-function setInputAvailability(optionInputs, availableOptionInputValues, existingOptionInputsValues) {
-  optionInputs.forEach((input) => {
-    if (availableOptionInputValues.includes(input.getAttribute('value'))) {
+function setInputAvailability(optionInputs: NodeListOf<Element> | Element[], availableOptionInputValues: string[], existingOptionInputsValues: string[]) {
+  optionInputs.forEach((input: Element) => {
+    const inputValue = input.getAttribute('value')
+    if (inputValue && availableOptionInputValues.includes(inputValue)) {
       if (window.prodify.pickerType == 'select') {
-        input.innerText = input.getAttribute('value')
+        const value = input.getAttribute('value')
+        if (value) (input as HTMLElement).innerText = value
         return
       }
       input.classList.remove('disabled')
     } else {
-      if (existingOptionInputsValues.includes(input.getAttribute('value'))) {
+      if (inputValue && existingOptionInputsValues.includes(inputValue)) {
         if (window.prodify.pickerType == 'select') {
-          input.innerText = SOLD_OUT_VARIANT_VALUE_STRING.replace(
-            '[value]',
-            input.getAttribute('value')
-          )
+          if (inputValue) {
+            (input as HTMLElement).innerText = SOLD_OUT_VARIANT_VALUE_STRING.replace(
+              '[value]',
+              inputValue
+            )
+          }
           return
         }
         input.classList.add('disabled')
       } else {
         if (window.prodify.pickerType == 'select') {
-          input.innerText = UNAVAILABLE_VARIANT_VALUE_STRING.replace(
-            '[value]',
-            input.getAttribute('value')
-          )
+          if (inputValue) {
+            (input as HTMLElement).innerText = UNAVAILABLE_VARIANT_VALUE_STRING.replace(
+              '[value]',
+              inputValue
+            )
+          }
           return
         }
         input.classList.add('disabled')
@@ -76,7 +84,7 @@ function setInputAvailability(optionInputs, availableOptionInputValues, existing
   })
 }
 
-function maybeSetOptionSelected(select) {
+function maybeSetOptionSelected(select: HTMLSelectElement) {
   if (window.prodify.pickerType == 'select') {
     const options = Array.from(select.querySelectorAll('option'))
     const currentValue = select.value
@@ -91,17 +99,22 @@ function maybeSetOptionSelected(select) {
   }
 }
 
-function updateQuantity(stepDirection) {
+function updateQuantity(stepDirection: 'up' | 'down') {
+  if (!window.prodify.quantityPresentationInput || !window.prodify.quantityHiddenInput) return
   const previousQuantity = parseInt(window.prodify.quantityPresentationInput.value)
 
   if (stepDirection == 'up') {
-    window.prodify.quantityHiddenInput.value = window.prodify.quantityPresentationInput.value = (previousQuantity + 1) as unknown as string
+    const newValue = (previousQuantity + 1).toString()
+    window.prodify.quantityHiddenInput.value = window.prodify.quantityPresentationInput.value = newValue
   } else {
-    window.prodify.quantityHiddenInput.value = window.prodify.quantityPresentationInput.value = (Math.max(1, previousQuantity - 1)) as unknown as string
+    const newValue = Math.max(1, previousQuantity - 1).toString()
+    window.prodify.quantityHiddenInput.value = window.prodify.quantityPresentationInput.value = newValue
   }
 }
 
 function swapProductInfo() {
+  if (!window.prodify.currentVariant || !window.prodify.el.dataset.url || !window.prodify.el.dataset.section) return
+
   fetchHTML(
     `${window.prodify.el.dataset.url}?variant=${window.prodify.currentVariant.id}&section_id=${window.prodify.el.dataset.section}`
   )
