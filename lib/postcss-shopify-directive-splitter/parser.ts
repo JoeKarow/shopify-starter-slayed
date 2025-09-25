@@ -5,9 +5,10 @@
  */
 
 import { Root, AtRule, Node } from 'postcss'
+import type { ProcessedDirective, DirectiveSplitterOptions } from '../../specs/001-shopify-template-codesplitting/contracts/postcss-plugin'
 
 export interface DirectiveNode {
-  type: 'split' | 'critical' | 'inline'
+  type: 'split' | 'critical' | 'inline' | 'responsive'
   name: string
   params?: string[]
   rules: string[]
@@ -24,13 +25,183 @@ export interface SplitResult {
 }
 
 /**
- * Parse directives from PostCSS root node
+ * Process a single directive AtRule into ProcessedDirective format
+ */
+export function processDirective(atRule: AtRule, options: DirectiveSplitterOptions): ProcessedDirective | null {
+  const type = atRule.name as ProcessedDirective['type']
+
+  // Only process known directive types
+  if (!['split', 'critical', 'inline', 'responsive'].includes(type)) {
+    return null
+  }
+
+  const params = atRule.params.trim().split(/\s+/).filter(Boolean)
+
+  // Extract CSS content from the directive
+  const content = extractDirectiveContent(atRule)
+  if (!content || content.trim().length === 0) {
+    return null
+  }
+
+  const sourceFile = atRule.source?.input?.from || 'unknown'
+  const lineNumber = atRule.source?.start?.line || 0
+
+  // Parse based on directive type
+  switch (type) {
+    case 'split':
+      return processSplitDirective(params, content, sourceFile, lineNumber, options)
+    case 'critical':
+      return processCriticalDirective(params, content, sourceFile, lineNumber)
+    case 'inline':
+      return processInlineDirective(params, content, sourceFile, lineNumber)
+    case 'responsive':
+      return processResponsiveDirective(params, content, sourceFile, lineNumber)
+    default:
+      return null
+  }
+}
+
+/**
+ * Process @split directive
+ */
+function processSplitDirective(
+  params: string[],
+  content: string,
+  sourceFile: string,
+  lineNumber: number,
+  options: DirectiveSplitterOptions
+): ProcessedDirective | null {
+  if (params.length === 0) {
+    return null // @split requires template name
+  }
+
+  const target = params[0]
+
+  // Validate against allowed splits
+  if (!options.validSplits.includes(target)) {
+    return null // Invalid split target
+  }
+
+  return {
+    type: 'split',
+    target,
+    content,
+    sourceFile,
+    lineNumber,
+    options: {}
+  }
+}
+
+/**
+ * Process @critical directive
+ */
+function processCriticalDirective(
+  params: string[],
+  content: string,
+  sourceFile: string,
+  lineNumber: number
+): ProcessedDirective {
+  const target = params.length > 0 ? params[0] : 'global'
+
+  return {
+    type: 'critical',
+    target,
+    content,
+    sourceFile,
+    lineNumber,
+    options: {}
+  }
+}
+
+/**
+ * Process @inline directive
+ */
+function processInlineDirective(
+  params: string[],
+  content: string,
+  sourceFile: string,
+  lineNumber: number
+): ProcessedDirective {
+  if (params.length === 0) {
+    // Default target for inline
+    return {
+      type: 'inline',
+      target: 'global',
+      content,
+      sourceFile,
+      lineNumber,
+      options: {}
+    }
+  }
+
+  const target = params[0]
+  const options: ProcessedDirective['options'] = {}
+
+  // Parse options from remaining params
+  for (let i = 1; i < params.length; i++) {
+    const param = params[i]
+    if (param === 'lazy') {
+      options.lazy = true
+    } else if (param === 'scoped') {
+      options.scoped = true
+    } else if (param.startsWith('priority:')) {
+      options.priority = param.split(':')[1] as any
+    }
+  }
+
+  return {
+    type: 'inline',
+    target,
+    content,
+    sourceFile,
+    lineNumber,
+    options
+  }
+}
+
+/**
+ * Process @responsive directive
+ */
+function processResponsiveDirective(
+  params: string[],
+  content: string,
+  sourceFile: string,
+  lineNumber: number
+): ProcessedDirective {
+  const target = params.length > 0 ? params[0] : 'global'
+
+  return {
+    type: 'responsive',
+    target,
+    content,
+    sourceFile,
+    lineNumber,
+    options: {}
+  }
+}
+
+/**
+ * Extract CSS content from directive AtRule
+ */
+function extractDirectiveContent(atRule: AtRule): string {
+  const content: string[] = []
+
+  // Walk through all child nodes and collect their string representation
+  atRule.each(node => {
+    content.push(node.toString())
+  })
+
+  return content.join('\n')
+}
+
+/**
+ * Parse directives from PostCSS root node (legacy compatibility)
  */
 export function parseDirectives(root: Root): DirectiveNode[] {
   const directives: DirectiveNode[] = []
 
   root.walkAtRules(rule => {
-    if (['split', 'critical', 'inline'].includes(rule.name)) {
+    if (['split', 'critical', 'inline', 'responsive'].includes(rule.name)) {
       const directive = parseDirective(rule)
       if (directive) {
         directives.push(directive)
@@ -44,10 +215,10 @@ export function parseDirectives(root: Root): DirectiveNode[] {
 }
 
 /**
- * Parse individual directive AtRule
+ * Parse individual directive AtRule (legacy compatibility)
  */
 function parseDirective(rule: AtRule): DirectiveNode | null {
-  const type = rule.name as 'split' | 'critical' | 'inline'
+  const type = rule.name as DirectiveNode['type']
   const params = rule.params.trim().split(/\s+/).filter(Boolean)
 
   if (type === 'split' && params.length === 0) {
@@ -89,6 +260,8 @@ export function validateDirective(directive: DirectiveNode): boolean {
       return directive.rules.length > 0
     case 'inline':
       return directive.rules.length > 0 && directive.params !== undefined
+    case 'responsive':
+      return directive.rules.length > 0
     default:
       return false
   }
