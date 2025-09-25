@@ -92,12 +92,12 @@ specs/[###-feature]/
 ```text
 lib/
 ├── postcss-shopify-directive-splitter/
-│   ├── index.js
-│   ├── parser.js
-│   ├── generator.js
+│   ├── index.ts
+│   ├── parser.ts
+│   ├── generator.ts
 │   └── test/
 ├── vite-plugin-performance-budget/
-│   ├── index.js
+│   ├── index.ts
 │   └── test/
 └── shopify-decorator-system/
     ├── index.ts
