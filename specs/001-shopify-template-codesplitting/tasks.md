@@ -134,22 +134,22 @@
 - [x] T065 [P] Test network adaptation on slow 3G connections
 - [x] T066 [P] Validate HMR with directive changes in development
 - [x] T067 Run quickstart.md validation scenarios end-to-end
-- [ ] QA-07 Launch QA agent to verify component migration and testing (commit with `chore(QA-07): verify phase 3.7 migration`)
+- [x] QA-07 Launch QA agent to verify component migration and testing (commit with `chore(QA-07): verify phase 3.7 migration`)
 
 ## Phase 3.8: Performance Validation & Polish
 
-- [ ] T068 Run Lighthouse CI on all major templates (target: score > 90)
+- [x] T068 Run Lighthouse CI on all major templates (target: score > 90)
 - [ ] T069 Measure mobile LCP improvement (baseline: 7.6s, target: < 2.5s)
 - [ ] T070 Measure CSS bundle reduction (baseline: 1.4MB, target: < 250KB)
-- [ ] T071 [P] Create unit tests for all directive parsers in tests/unit/
-- [ ] T072 [P] Create unit tests for all decorators in tests/unit/
+- [x] T071 [P] Create unit tests for all directive parsers in tests/unit/
+- [x] T072 [P] Create unit tests for all decorators in tests/unit/
 - [ ] T073 [P] Add visual regression tests for critical CSS in tests/visual/
-- [ ] T074 Update CLAUDE.md with new directive patterns and examples
-- [ ] T075 Document performance metrics and improvements in specs/001-shopify-template-codesplitting/metrics.md
-- [ ] T076 Create migration guide for existing themes in docs/migration.md
-- [ ] T077 [P] Setup RUM collection with Web Vitals library in frontend/entrypoints/rum.ts
-- [ ] T078 [P] Configure RUM data reporting to analytics endpoint
-- [ ] QA-08 Launch QA agent for final validation and performance verification (commit with `chore(QA-08): verify phase 3.8 performance`)
+- [x] T074 Update CLAUDE.md with new directive patterns and examples
+- [x] T075 Document performance metrics and improvements in specs/001-shopify-template-codesplitting/metrics.md
+- [x] T076 Create migration guide for existing themes in docs/migration.md
+- [x] T077 [P] Setup RUM collection with Web Vitals library in frontend/entrypoints/rum.ts
+- [x] T078 [P] Configure RUM data reporting to analytics endpoint
+- [x] QA-08 Launch QA agent for final validation and performance verification (commit with `chore(QA-08): verify phase 3.8 performance`)
 
 ## Dependencies
 
