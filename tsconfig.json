@@ -54,6 +54,7 @@
     "sourceMap": true,
     "removeComments": false,
     "importHelpers": true,
+    "noEmit": true,
 
     // Interop Constraints
     "allowImportingTsExtensions": false,

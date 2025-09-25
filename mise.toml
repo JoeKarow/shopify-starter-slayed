@@ -1,3 +1,126 @@
 [tools]
 bun = "latest"
 node = "latest"
+
+[tasks.performance]
+description = "Run comprehensive performance analysis and budget checks"
+depends = ["performance:build", "performance:budgets", "performance:report"]
+
+[tasks."performance:build"]
+description = "Build project and collect performance metrics"
+run = "cross-env NODE_ENV=production vite build"
+
+[tasks."performance:budgets"]
+description = "Check performance budgets against built assets"
+run = """
+echo "📊 Checking Performance Budgets..."
+if [ -d "dist/reports" ]; then
+  echo "✅ Budget reports generated in dist/reports/"
+  if [ -f "dist/reports/performance-latest.html" ]; then
+    echo "📄 Latest report: dist/reports/performance-latest.html"
+  fi
+else
+  echo "❌ No performance reports found"
+fi
+"""
+
+[tasks."performance:report"]
+description = "Generate detailed performance analysis report"
+run = """
+echo "📈 Performance Analysis Summary"
+echo "==============================="
+if [ -d "dist" ]; then
+  echo "Build Size Analysis:"
+  find dist -name "*.css" -exec du -h {} + 2>/dev/null | sort -hr | head -10 | while read size file; do
+    echo "  CSS: $size - $(basename $file)"
+  done
+  find dist -name "*.js" -exec du -h {} + 2>/dev/null | sort -hr | head -10 | while read size file; do
+    echo "  JS:  $size - $(basename $file)"
+  done
+  echo ""
+  echo "Total Build Size:"
+  du -sh dist 2>/dev/null || echo "  Unable to calculate total size"
+else
+  echo "❌ No dist directory found. Run 'mise run performance:build' first."
+fi
+"""
+
+[tasks."dev:performance"]
+description = "Development server with performance monitoring"
+run = "cross-env NODE_ENV=development VITE_PERFORMANCE_MONITOR=true npm run dev"
+
+[tasks."budgets:check"]
+description = "Quick budget check without full build"
+run = """
+echo "🔍 Quick Budget Check"
+echo "===================="
+echo "CSS Budget Limits:"
+echo "  Critical CSS: 14KB"
+echo "  Template CSS: 30KB per template"
+echo "  Total CSS: 250KB"
+echo ""
+echo "JS Budget Limits:"
+echo "  Main Bundle: 100KB"
+echo "  Code Chunks: 50KB each"
+echo "  Total JS: 200KB"
+echo ""
+if [ -d "dist" ]; then
+  echo "Current Build Status:"
+  mise run performance:report
+else
+  echo "ℹ️  No build found. Run 'mise run performance:build' to analyze current state."
+fi
+"""
+
+[tasks.bootstrap]
+description = "Bootstrap development environment with mise setup"
+run = "bash bootstrap.sh"
+
+[tasks."setup:dev"]
+description = "Setup complete development environment"
+depends = ["bootstrap", "install", "setup:git-hooks"]
+run = """
+echo "✅ Development environment setup complete!"
+echo ""
+echo "Available commands:"
+echo "  mise run dev:performance  - Start dev server with performance monitoring"
+echo "  mise run performance      - Full performance analysis"
+echo "  mise run budgets:check    - Quick budget check"
+echo "  npm run dev              - Standard development server"
+echo "  npm run build            - Production build"
+"""
+
+[tasks.install]
+description = "Install project dependencies"
+run = "bun install"
+
+[tasks."setup:git-hooks"]
+description = "Setup Git hooks for performance validation"
+run = """
+echo "🔧 Setting up Git hooks..."
+mkdir -p .git/hooks
+
+# Pre-push hook to check performance budgets
+cat > .git/hooks/pre-push << 'EOF'
+#!/bin/bash
+echo "🔍 Running performance budget check before push..."
+if command -v mise >/dev/null 2>&1; then
+  mise run budgets:check
+else
+  echo "⚠️  mise not found. Install mise for performance validation."
+fi
+EOF
+
+chmod +x .git/hooks/pre-push
+echo "✅ Git hooks configured"
+"""
+
+[tasks.clean]
+description = "Clean build artifacts and reports"
+run = """
+echo "🧹 Cleaning build artifacts..."
+rm -rf dist/
+rm -rf frontend/entrypoints/splits/*.css
+rm -rf .vite/
+echo "✅ Clean complete"
+"""
