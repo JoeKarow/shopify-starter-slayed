@@ -45,7 +45,7 @@
 - [x] T006 [P] Configure Vite auto-imports for global decorator availability in vite.config.ts
 - [x] T007 Create frontend/entrypoints/splits/ directory for generated CSS files
 - [x] T008 [P] Update existing mise.toml with performance tasks and create bootstrap.sh script for mise installation
-- [ ] QA-01 Launch QA agent to verify setup configuration (commit with `chore(QA-01): verify phase 3.1 setup`)
+- [x] QA-01 Launch QA agent to verify setup configuration (commit with `chore(QA-01): verify phase 3.1 setup`)
 
 ## Phase 3.2: Contract & Performance Tests First ⚠️ MUST COMPLETE BEFORE 3.3
 
@@ -68,7 +68,7 @@
 - [x] T020 [P] Integration test: @critical directive extraction in tests/integration/directive-critical.test.ts
 - [x] T021 [P] Integration test: Decorator auto-discovery in tests/integration/decorator-discovery.test.ts
 - [x] T022 [P] Integration test: Network-aware loading in tests/integration/network-aware.test.ts
-- [ ] QA-02 Launch QA agent to verify all tests are written and failing (commit with `chore(QA-02): verify phase 3.2 tests`)
+- [x] QA-02 Launch QA agent to verify all tests are written and failing (commit with `chore(QA-02): verify phase 3.2 tests`)
 
 ## Phase 3.3: Core Implementation - PostCSS Plugin (ONLY after tests are failing)
 
@@ -81,7 +81,7 @@
 - [x] T029 Implement directive validation and conflict detection in lib/postcss-shopify-directive-splitter/validator.ts
 - [x] T030 Implement main plugin with PostCSS API in lib/postcss-shopify-directive-splitter/index.ts
 - [x] T031 [P] Create content hash generation for cache busting in lib/postcss-shopify-directive-splitter/utils.ts
-- [ ] QA-03 Launch QA agent to verify PostCSS plugin implementation (commit with `chore(QA-03): verify phase 3.3 postcss`)
+- [x] QA-03 Launch QA agent to verify PostCSS plugin implementation (commit with `chore(QA-03): verify phase 3.3 postcss`)
 
 ## Phase 3.4: Core Implementation - TypeScript Decorators
 
@@ -96,7 +96,7 @@
 - [x] T040 [P] Implement loading strategy calculator in lib/shopify-decorator-system/strategies.ts
 - [x] T041 [P] Implement IntersectionObserver manager for lazy loading in lib/shopify-decorator-system/observer.ts (check Alpine.js for existing observer utilities)
 - [x] T042 [P] Implement Network Information API wrapper in lib/shopify-decorator-system/network.ts
-- [ ] QA-04 Launch QA agent to verify decorator system implementation (commit with `chore(QA-04): verify phase 3.4 decorators`)
+- [x] QA-04 Launch QA agent to verify decorator system implementation (commit with `chore(QA-04): verify phase 3.4 decorators`)
 
 ## Phase 3.5: Vite & Build Integration
 
