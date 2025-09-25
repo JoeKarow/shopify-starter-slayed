@@ -3,11 +3,13 @@
     ".",
     "lib/**/*",
     "frontend/**/*",
-    "src/**/*"
+    "src/**/*",
+    "types/**/*"
   ],
   "typeRoots": [
     "node_modules/@types",
-    "lib/shopify-decorator-system/types"
+    "lib/shopify-decorator-system/types",
+    "types"
   ],
   "exclude": [
     "dist",

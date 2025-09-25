@@ -38,6 +38,16 @@ const MOCK_NETWORK_CONDITIONS = {
   }
 }
 
+// Helper function to create a mock network connection
+function createMockConnection(config: any) {
+  return {
+    ...config,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn()
+  }
+}
+
 // Sample network-aware components
 const NETWORK_AWARE_COMPONENTS = {
   'AdaptiveGallery.ts': `
@@ -470,15 +480,18 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
       try {
         await registry.discoverComponents(COMPONENTS_DIR)
 
-        const adaptiveGallery = registry.getComponentsForTemplate('product')
-          .find((c: any) => c.className === 'AdaptiveGallery')
+        const components = registry.getComponentsForTemplate('product')
+        const adaptiveGallery = components.find((c: any) => c.className === 'AdaptiveGallery')
 
         expect(adaptiveGallery).toBeDefined()
 
         // Test fast network strategy
-        (global.navigator as any).connection = { downlink: 20, effectiveType: '4g' }
+        ;(global.navigator as any).connection = createMockConnection({
+          downlink: 20,
+          effectiveType: '4g'
+        })
 
-        let fastStrategy = registry.getLoadingStrategy(adaptiveGallery, {
+        let fastStrategy = registry.getLoadingStrategy(adaptiveGallery!, {
           template: 'product',
           network: 'fast'
         })
@@ -487,9 +500,12 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         expect(fastStrategy.priority).toBeLessThan(10) // Higher priority
 
         // Test slow network strategy
-        (global.navigator as any).connection = { downlink: 2, effectiveType: '3g' }
+        ;(global.navigator as any).connection = createMockConnection({
+          downlink: 2,
+          effectiveType: '3g'
+        })
 
-        let slowStrategy = registry.getLoadingStrategy(adaptiveGallery, {
+        let slowStrategy = registry.getLoadingStrategy(adaptiveGallery!, {
           template: 'product',
           network: 'slow'
         })
@@ -511,7 +527,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
       try {
         // Enable data saver
-        global.navigator.connection.saveData = true
+        ;(global.navigator as any).connection = createMockConnection({ saveData: true })
 
         await registry.discoverComponents(COMPONENTS_DIR)
 
@@ -541,26 +557,34 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
       try {
         const mockConnectionEvent = {
           type: 'change',
-          target: global.navigator.connection
+          target: (global.navigator as any).connection
         }
 
         // Start with fast network
-        global.navigator.connection.downlink = 20
-        global.navigator.connection.effectiveType = '4g'
+        ;(global.navigator as any).connection = createMockConnection({
+          downlink: 20,
+          effectiveType: '4g'
+        })
 
         const initialStatus = decoratorSystem.getNetworkStatus()
         expect(initialStatus.type).toBe('fast')
 
         // Simulate network degradation
-        global.navigator.connection.downlink = 1
-        global.navigator.connection.effectiveType = '3g'
+        ;(global.navigator as any).connection = createMockConnection({
+          downlink: 1,
+          effectiveType: '3g'
+        })
 
         // Trigger connection change event
-        const changeHandler = vi.mocked(global.navigator.connection.addEventListener).mock.calls
-          .find(call => call[0] === 'change')?.[1]
+        const changeHandler = vi.mocked((global.navigator as any).connection.addEventListener).mock.calls
+          .find((call: any) => call[0] === 'change')?.[1]
 
         if (changeHandler) {
-          changeHandler(mockConnectionEvent)
+          if (typeof changeHandler === 'function') {
+            changeHandler(mockConnectionEvent)
+          } else if (changeHandler && 'handleEvent' in changeHandler) {
+            changeHandler.handleEvent(mockConnectionEvent)
+          }
         }
 
         const updatedStatus = decoratorSystem.getNetworkStatus()
@@ -630,10 +654,12 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         const components = await registry.discoverComponents(COMPONENTS_DIR)
 
         // Simulate slow network
-        global.navigator.connection.downlink = 1.5
-        global.navigator.connection.effectiveType = '3g'
+        ;(global.navigator as any).connection = createMockConnection({
+          downlink: 1.5,
+          effectiveType: '3g'
+        })
 
-        const loadingPromises = components.map(component =>
+        const loadingPromises = components.map((component: any) =>
           registry.initializeComponent(component, {
             trigger: 'immediate',
             priority: 5,
@@ -708,7 +734,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
         // Should have reduceQuality option enabled
         const networkAwareDecorator = adaptiveGallery.decorators
-          .find(d => d.type === 'NetworkAware')
+          .find((d: any) => d.type === 'NetworkAware')
 
         expect(networkAwareDecorator.parameters.reduceQuality).toBe(true)
 
@@ -768,9 +794,11 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
       try {
         // Simulate slow network conditions
-        global.navigator.connection.downlink = 1
-        global.navigator.connection.effectiveType = '3g'
-        global.navigator.connection.rtt = 400
+        ;(global.navigator as any).connection = createMockConnection({
+          downlink: 1,
+          effectiveType: '3g'
+        })
+        Object.assign((global.navigator as any).connection, { rtt: 400 })
 
         const recommendations = await decoratorSystem.getPerformanceRecommendations()
 
@@ -834,7 +862,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
       try {
         // Enable data saver mode
-        global.navigator.connection.saveData = true
+        ;(global.navigator as any).connection = createMockConnection({ saveData: true })
 
         const dataSaverComponent = await decoratorSystem.createComponent('DataSaverAware', {
           template: 'index',
@@ -858,8 +886,10 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
       try {
         // Simulate slow network but user wants full experience
-        global.navigator.connection.downlink = 1
-        global.navigator.connection.effectiveType = '3g'
+        ;(global.navigator as any).connection = createMockConnection({
+          downlink: 1,
+          effectiveType: '3g'
+        })
 
         const userPreferences = {
           forceHighQuality: true,
@@ -929,8 +959,8 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
         // Should only load cached or critical components
         const availableComponents = await decoratorSystem.getAvailableComponents()
-        expect(availableComponents.every(c =>
-          c.cached || c.decorators.some(d => d.type === 'Critical')
+        expect(availableComponents.every((c: any) =>
+          c.cached || c.decorators.some((d: any) => d.type === 'Critical')
         )).toBe(true)
 
       } catch (error) {
@@ -989,7 +1019,7 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
         if (conflictingComponent) {
           // Should either merge settings or warn about conflict
-          const networkDecorators = conflictingComponent.decorators.filter(d => d.type === 'NetworkAware')
+          const networkDecorators = conflictingComponent.decorators.filter((d: any) => d.type === 'NetworkAware')
 
           if (networkDecorators.length > 1) {
             expect(conflictingComponent.warnings).toBeDefined()
@@ -1016,8 +1046,10 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
 
         // Simulate rapid network changes
         for (let i = 0; i < 10; i++) {
-          global.navigator.connection.downlink = Math.random() * 20
-          global.navigator.connection.effectiveType = ['2g', '3g', '4g'][Math.floor(Math.random() * 3)]
+          Object.assign((global.navigator as any).connection, {
+            downlink: Math.random() * 20,
+            effectiveType: ['2g', '3g', '4g'][Math.floor(Math.random() * 3)]
+          })
 
           const status = decoratorSystem.getNetworkStatus()
           networkChanges.push(status)
@@ -1048,9 +1080,9 @@ describe('Network-Aware Loading Integration Tests (T022)', () => {
         })
 
         // Track event listeners
-        const addEventListenerSpy = vi.spied(global.navigator.connection.addEventListener)
-        const removeEventListenerSpy = vi.fn()
-        global.navigator.connection.removeEventListener = removeEventListenerSpy
+        const addEventListenerSpy = vi.spyOn((global.navigator as any).connection, 'addEventListener')
+        const removeEventListenerSpy: any = vi.fn()
+        ;(global.navigator as any).connection.removeEventListener = removeEventListenerSpy
 
         // Initialize component
         await component.initialize()

@@ -18,7 +18,7 @@ import type {
 } from '../../specs/001-shopify-template-codesplitting/contracts/decorator-system'
 
 describe('Decorator System: Template Decorator Contract (T012)', () => {
-  let Template: typeof Template
+  let Template: any
   let registry: ComponentRegistry
 
   beforeEach(() => {
@@ -28,8 +28,8 @@ describe('Decorator System: Template Decorator Contract (T012)', () => {
     registry = decoratorSystem.registry
 
     // Clear registry for each test
-    if (registry && typeof registry.clear === 'function') {
-      registry.clear()
+    if (registry && typeof (registry as any).clear === 'function') {
+      (registry as any).clear()
     }
   })
 
@@ -295,13 +295,13 @@ describe('Decorator System: Template Decorator Contract (T012)', () => {
 
     it('should handle undefined or null parameters gracefully', () => {
       expect(() => {
-        // @ts-expect-error - Testing invalid input
+        // @ts-ignore - Testing invalid input
         @Template(null)
         class NullComponent {}
       }).not.toThrow()
 
       expect(() => {
-        // @ts-expect-error - Testing invalid input
+        // @ts-ignore - Testing invalid input
         @Template(undefined)
         class UndefinedComponent {}
       }).not.toThrow()

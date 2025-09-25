@@ -429,13 +429,13 @@ test.describe('CSS Performance Budget Tests (T016)', () => {
 
         for (const stylesheet of stylesheets) {
           try {
-            const rules = stylesheet.cssRules || stylesheet.rules
+            const rules = stylesheet.cssRules
             if (rules) {
               totalRules += rules.length
 
               for (let i = 0; i < rules.length; i++) {
                 const rule = rules[i]
-                if (rule.type === CSSRule.STYLE_RULE) {
+                if (rule.constructor.name === 'CSSStyleRule') {
                   const selectorText = (rule as CSSStyleRule).selectorText
                   if (selectorText && !document.querySelector(selectorText)) {
                     unusedRules++

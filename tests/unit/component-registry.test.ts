@@ -38,8 +38,8 @@ describe('Component Registry Contract (T014)', () => {
     registry = decoratorSystem.registry
 
     // Clear registry for each test
-    if (registry && typeof registry.clear === 'function') {
-      registry.clear()
+    if (registry && typeof (registry as any).clear === 'function') {
+      (registry as any).clear()
     }
 
     // Mock component metadata for testing
@@ -551,9 +551,9 @@ describe('Component Registry Contract (T014)', () => {
 
   describe('memory management and cleanup', () => {
     it('should have cleanup method for memory management', () => {
-      if (typeof registry.clear === 'function') {
-        expect(registry.clear).toBeDefined()
-        expect(typeof registry.clear).toBe('function')
+      if (typeof (registry as any).clear === 'function') {
+        expect((registry as any).clear).toBeDefined()
+        expect(typeof (registry as any).clear).toBe('function')
       }
     })
 
@@ -562,8 +562,8 @@ describe('Component Registry Contract (T014)', () => {
         registry.register(component)
       })
 
-      if (typeof registry.clear === 'function') {
-        registry.clear()
+      if (typeof (registry as any).clear === 'function') {
+        (registry as any).clear()
 
         const components = registry.getComponentsForTemplate('product')
         expect(components).toHaveLength(0)

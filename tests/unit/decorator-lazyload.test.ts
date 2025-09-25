@@ -27,7 +27,7 @@ global.IntersectionObserver = vi.fn().mockImplementation((callback) => ({
 }))
 
 describe('Decorator System: LazyLoad Decorator Contract (T013)', () => {
-  let LazyLoad: typeof LazyLoad
+  let LazyLoad: any
   let registry: ComponentRegistry
 
   beforeEach(() => {
@@ -37,8 +37,8 @@ describe('Decorator System: LazyLoad Decorator Contract (T013)', () => {
     registry = decoratorSystem.registry
 
     // Clear registry for each test
-    if (registry && typeof registry.clear === 'function') {
-      registry.clear()
+    if (registry && typeof (registry as any).clear === 'function') {
+      (registry as any).clear()
     }
   })
 
@@ -452,13 +452,13 @@ describe('Decorator System: LazyLoad Decorator Contract (T013)', () => {
 
     it('should handle null or undefined options gracefully', () => {
       expect(() => {
-        // @ts-expect-error - Testing invalid input
+        // @ts-ignore - Testing invalid input
         @LazyLoad(null)
         class NullOptionsComponent {}
       }).not.toThrow()
 
       expect(() => {
-        // @ts-expect-error - Testing invalid input
+        // @ts-ignore - Testing invalid input
         @LazyLoad(undefined)
         class UndefinedOptionsComponent {}
       }).not.toThrow()

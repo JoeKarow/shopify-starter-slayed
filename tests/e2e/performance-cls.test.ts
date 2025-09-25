@@ -371,11 +371,11 @@ test.describe('CLS Performance Tests (T018c)', () => {
         const stylesheets = Array.from(document.styleSheets)
         for (const stylesheet of stylesheets) {
           try {
-            const rules = stylesheet.cssRules || stylesheet.rules
+            const rules = stylesheet.cssRules
             if (rules) {
               for (let i = 0; i < rules.length; i++) {
                 const rule = rules[i]
-                if (rule.type === CSSRule.FONT_FACE_RULE) {
+                if (rule.constructor.name === 'CSSFontFaceRule') {
                   const fontFaceRule = rule as CSSFontFaceRule
                   if ((fontFaceRule.style as any).fontDisplay) {
                     fontLoadingStrategies.fontDisplay++
