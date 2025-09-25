@@ -5,7 +5,7 @@
  */
 
 import type { GeneratedFile, DirectiveSplitterOptions } from '../../specs/001-shopify-template-codesplitting/contracts/postcss-plugin'
-import { formatBytes } from './utils'
+import { formatBytes } from './utils.ts'
 
 export interface BudgetViolation {
   type: 'criticalCSS' | 'templateCSS' | 'totalCSS'
@@ -66,7 +66,7 @@ export function checkBudget(
       files: criticalFiles,
       suggestions: [
         'Move non-essential styles out of @critical directives',
-        'Consider lazy-loading some critical styles',
+        'Consider lazyloading some critical styles',
         'Optimize CSS selectors and remove unused rules',
         'Use CSS compression techniques'
       ]

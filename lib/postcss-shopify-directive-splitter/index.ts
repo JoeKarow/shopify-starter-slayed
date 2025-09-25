@@ -5,7 +5,7 @@
  * split and organize CSS for optimal performance in Shopify themes.
  */
 
-import { Plugin, Root, AtRule } from 'postcss'
+import type { Plugin, Root, AtRule } from 'postcss'
 import type {
   DirectiveSplitterOptions,
   DirectiveSplitterAPI,
@@ -15,10 +15,10 @@ import type {
   ProcessingResult
 } from '../../specs/001-shopify-template-codesplitting/contracts/postcss-plugin'
 
-import { processDirective } from './parser'
-import { generateFiles, createLiquidSnippet, writeGeneratedFiles } from './generator'
-import { checkBudget, generateBudgetReport, shouldFailBuild } from './budget'
-import { validateDirectives } from './validator'
+import { processDirective } from './parser.ts'
+import { generateFiles, createLiquidSnippet, writeGeneratedFiles } from './generator.ts'
+import { checkBudget, generateBudgetReport, shouldFailBuild } from './budget.ts'
+import { validateDirectives } from './validator.ts'
 
 /**
  * Main PostCSS plugin factory
@@ -27,7 +27,8 @@ function directiveSplitter(options: DirectiveSplitterOptions): DirectiveSplitter
   return {
     postcssPlugin: 'postcss-shopify-directive-splitter',
 
-    async Once(root: Root, { result }) {
+    async Once(root: Root, helpers: { result: any }) {
+      const { result } = helpers
       try {
         const processingResult = await processCSS(root, options)
 
@@ -190,11 +191,11 @@ export type {
   ProcessingResult
 } from '../../specs/001-shopify-template-codesplitting/contracts/postcss-plugin'
 
-export { processDirective } from './parser'
-export { generateFiles, createLiquidSnippet } from './generator'
-export { checkBudget } from './budget'
-export { validateDirectives } from './validator'
+export { processDirective } from './parser.ts'
+export { generateFiles, createLiquidSnippet } from './generator.ts'
+export { checkBudget } from './budget.ts'
+export { validateDirectives } from './validator.ts'
 
 // Legacy exports for backward compatibility
-export { parseDirectives } from './parser'
-export type { DirectiveNode, SplitResult } from './parser'
+export { parseDirectives } from './parser.ts'
+export type { DirectiveNode, SplitResult } from './parser.ts'

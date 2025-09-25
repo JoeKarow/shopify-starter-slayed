@@ -7,7 +7,7 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import type { ProcessedDirective, GeneratedFile, DirectiveSplitterOptions } from '../../specs/001-shopify-template-codesplitting/contracts/postcss-plugin'
-import { generateContentHash, generateSplitFilePath, generateCriticalFilePath, generateSnippetFilePath, minifyCSS } from './utils'
+import { generateContentHash, generateSplitFilePath, generateCriticalFilePath, generateSnippetFilePath, minifyCSS } from './utils.ts'
 
 /**
  * Generate files from processed directives

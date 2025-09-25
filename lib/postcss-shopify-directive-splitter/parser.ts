@@ -4,7 +4,7 @@
  * Parses CSS directives like @split, @critical, @inline from PostCSS AST
  */
 
-import { Root, AtRule, Node } from 'postcss'
+import type { Root, AtRule, Node } from 'postcss'
 import type { ProcessedDirective, DirectiveSplitterOptions } from '../../specs/001-shopify-template-codesplitting/contracts/postcss-plugin'
 
 export interface DirectiveNode {

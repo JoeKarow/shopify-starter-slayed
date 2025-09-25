@@ -151,7 +151,7 @@ function validateInlineDirective(directive: ProcessedDirective): ValidationResul
   // Validate options
   const options = directive.options || {}
 
-  if (options.priority && !['low', 'normal', 'high'].includes(options.priority as string)) {
+  if (options.priority && !['low', 'normal', 'high'].includes(String(options.priority))) {
     results.push({
       type: 'error',
       message: `Invalid priority value: ${options.priority}. Must be 'low', 'normal', or 'high'.`,
