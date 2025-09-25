@@ -24,7 +24,13 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "lighthouse": "lhci collect && lhci assert",
+    "lighthouse:collect": "lhci collect",
+    "lighthouse:assert": "lhci assert",
+    "lighthouse:server": "lhci server --config=lighthouserc.js",
+    "performance:audit": "bun run build && bun run lighthouse",
+    "performance:baseline": "bun run lighthouse:collect --config=lighthouserc.js"
   },
   "devDependencies": {
     "@alpinejs/collapse": "^3.14.1",
