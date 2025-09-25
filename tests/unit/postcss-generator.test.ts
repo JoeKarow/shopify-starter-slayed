@@ -271,13 +271,13 @@ describe('PostCSS Plugin: generateFiles Contract (T010)', () => {
 
         if (file.type === 'css-split') {
           expect(file.path).toContain('/splits/')
-          expect(file.path).toEndWith('.css')
+          expect(file.path).toMatch(/\.css$/)
         } else if (file.type === 'critical-css') {
           expect(file.path).toContain('critical')
-          expect(file.path).toEndWith('.css')
+          expect(file.path).toMatch(/\.css$/)
         } else if (file.type === 'liquid-snippet') {
           expect(file.path).toContain('snippets/')
-          expect(file.path).toEndWith('.liquid')
+          expect(file.path).toMatch(/\.liquid$/)
         }
       })
     })

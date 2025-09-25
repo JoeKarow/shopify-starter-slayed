@@ -11,7 +11,7 @@ export { ComponentRegistry, registry } from './registry.js'
 
 // Core Class Decorators
 export { Template, ExcludeTemplate, GlobalTemplate } from './decorators/template.js'
-export { LazyLoad } from './decorators/lazy-load.js'
+export { LazyLoad } from './decorators/lazyload.js'
 export { Critical } from './decorators/critical.js'
 export { NetworkAware } from './decorators/network-aware.js'
 
@@ -41,7 +41,7 @@ export type {
 
 // Types from Decorators
 export type { TemplateDecoratorOptions } from './decorators/template.js'
-export type { LazyLoadDecoratorOptions } from './decorators/lazy-load.js'
+export type { LazyLoadDecoratorOptions } from './decorators/lazyload.js'
 export type { NetworkAwareDecoratorOptions } from './decorators/network-aware.js'
 export type { DebouncedOptions } from './decorators/debounced.js'
 export type { CachedOptions } from './decorators/cached.js'

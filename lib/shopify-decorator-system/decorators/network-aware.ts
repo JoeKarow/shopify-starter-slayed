@@ -16,8 +16,8 @@ export interface NetworkAwareDecoratorOptions {
 /**
  * NetworkAware decorator - adapts loading based on network speed
  */
-export function NetworkAware(options: NetworkAwareDecoratorOptions = {}): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+export function NetworkAware(options: NetworkAwareDecoratorOptions = {}) {
+  return function <T extends { new (...args: any[]): {} }>(constructor: T): T {
     const registry = ComponentRegistry.getInstance()
 
     // Validate slowThreshold

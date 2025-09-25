@@ -9,7 +9,7 @@ import type { ComponentMetadata } from './registry.js'
 /**
  * Auto-discover all decorated components using Vite glob imports
  */
-export async function discoverComponents(pattern = '/frontend/components/**/*.ts'): Promise<ComponentMetadata[]> {
+export async function discoverComponents(): Promise<ComponentMetadata[]> {
   const components: ComponentMetadata[] = []
 
   try {
@@ -22,7 +22,7 @@ export async function discoverComponents(pattern = '/frontend/components/**/*.ts
     // Import each module and extract component metadata
     for (const [path, importFn] of Object.entries(modules)) {
       try {
-        const moduleDefault = await importFn()
+        const moduleDefault = await (importFn as () => Promise<any>)()
         const metadata = extractComponentMetadata(moduleDefault, path)
 
         if (metadata) {
@@ -46,7 +46,7 @@ export async function discoverComponents(pattern = '/frontend/components/**/*.ts
       }
 
       try {
-        const moduleDefault = await importFn()
+        const moduleDefault = await (importFn as () => Promise<any>)()
         const metadata = extractComponentMetadata(moduleDefault, path)
 
         if (metadata) {
@@ -116,7 +116,7 @@ export async function discoverComponentsInDir(directory: string): Promise<Compon
 
     for (const [path, importFn] of Object.entries(modules)) {
       try {
-        const moduleDefault = await importFn()
+        const moduleDefault = await (importFn as () => Promise<any>)()
         const metadata = extractComponentMetadata(moduleDefault, path)
 
         if (metadata) {
@@ -183,7 +183,7 @@ async function findConstructorByName(className: string, filePath: string): Promi
     }
 
     // Check all exports for matching class name
-    for (const [key, value] of Object.entries(module)) {
+    for (const [_key, value] of Object.entries(module)) {
       if (typeof value === 'function' && value.name === className) {
         return value
       }

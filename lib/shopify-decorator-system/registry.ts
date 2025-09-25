@@ -5,19 +5,23 @@
  */
 
 import 'reflect-metadata'
+import type { TemplateDecoratorOptions } from './decorators/template.js'
+import type { LazyLoadDecoratorOptions } from './decorators/lazyload.js'
+import type { NetworkAwareDecoratorOptions } from './decorators/network-aware.js'
 
 // Contract-based interfaces
 export interface ComponentMetadata {
   className: string
   filePath: string
   decorators: DecoratorMetadata[]
-  instance?: any
+  instance?: unknown
 }
 
-export interface DecoratorMetadata {
-  type: 'Template' | 'LazyLoad' | 'Critical' | 'NetworkAware'
-  parameters: any
-}
+export type DecoratorMetadata =
+  | { type: 'Template'; parameters: TemplateDecoratorOptions }
+  | { type: 'LazyLoad'; parameters: LazyLoadDecoratorOptions }
+  | { type: 'Critical'; parameters: {} }
+  | { type: 'NetworkAware'; parameters: NetworkAwareDecoratorOptions }
 
 export interface LoadingStrategy {
   trigger: 'immediate' | 'viewport' | 'interaction' | 'idle'
@@ -90,16 +94,15 @@ export class ComponentRegistry {
    */
   getComponentsForTemplate(template: string): ComponentMetadata[] {
     return Array.from(this.components.values()).filter(component => {
-      const templateDecorator = component.decorators.find(d => d.type === 'Template')
+      const templateDecorator = component.decorators.find(d => d.type === 'Template') as
+        { type: 'Template'; parameters: TemplateDecoratorOptions } | undefined
       if (!templateDecorator) return false
 
-      const templates = Array.isArray(templateDecorator.parameters)
-        ? templateDecorator.parameters
-        : templateDecorator.parameters.templates === '*'
-          ? ['*']
-          : Array.isArray(templateDecorator.parameters.templates)
-            ? templateDecorator.parameters.templates
-            : [templateDecorator.parameters.templates]
+      const templates = templateDecorator.parameters.templates === '*'
+        ? ['*']
+        : Array.isArray(templateDecorator.parameters.templates)
+          ? templateDecorator.parameters.templates
+          : [templateDecorator.parameters.templates]
 
       return templates.includes(template) || templates.includes('*')
     })
@@ -113,9 +116,12 @@ export class ComponentRegistry {
     network?: 'slow' | 'fast'
     viewport?: DOMRect
   }): LoadingStrategy {
-    const criticalDecorator = component.decorators.find(d => d.type === 'Critical')
-    const lazyDecorator = component.decorators.find(d => d.type === 'LazyLoad')
-    const networkDecorator = component.decorators.find(d => d.type === 'NetworkAware')
+    const criticalDecorator = component.decorators.find(d => d.type === 'Critical') as
+      { type: 'Critical'; parameters: {} } | undefined
+    const lazyDecorator = component.decorators.find(d => d.type === 'LazyLoad') as
+      { type: 'LazyLoad'; parameters: LazyLoadDecoratorOptions } | undefined
+    const networkDecorator = component.decorators.find(d => d.type === 'NetworkAware') as
+      { type: 'NetworkAware'; parameters: NetworkAwareDecoratorOptions } | undefined
 
     // Critical components load immediately
     if (criticalDecorator) {
@@ -127,14 +133,13 @@ export class ComponentRegistry {
 
     // Lazy load components wait for viewport intersection
     if (lazyDecorator) {
-      const options = lazyDecorator.parameters || {}
       return {
         trigger: 'viewport',
         priority: 10,
         conditions: {
           viewport: {
-            rootMargin: options.rootMargin || '100vh',
-            threshold: options.threshold || 0.1
+            rootMargin: lazyDecorator.parameters.rootMargin || '100vh',
+            threshold: lazyDecorator.parameters.threshold || 0.1
           }
         }
       }
@@ -142,8 +147,7 @@ export class ComponentRegistry {
 
     // Network aware components adapt to connection speed
     if (networkDecorator && context.network === 'slow') {
-      const options = networkDecorator.parameters || {}
-      const fallbackStrategy = options.fallbackStrategy || 'defer'
+      const fallbackStrategy = networkDecorator.parameters.fallbackStrategy || 'defer'
 
       switch (fallbackStrategy) {
         case 'defer':
@@ -305,29 +309,74 @@ export class ComponentRegistry {
   list(): ComponentMetadata[] {
     return Array.from(this.components.values())
   }
+
+  /**
+   * Clear all registered components (for testing)
+   */
+  clear(): void {
+    this.components.clear()
+    this.loadedComponents.clear()
+    this.performanceMetrics = {
+      componentsLoaded: 0,
+      totalLoadTime: 0,
+      cacheHits: 0,
+      networkRequests: 0,
+      bytesTransferred: 0,
+    }
+  }
 }
 
 // Singleton instance - global registry as per contract
 export const registry = ComponentRegistry.getInstance()
 
+
 /**
- * Get current Shopify template from document
+ * Register a component with the global registry
  */
-function getCurrentTemplate(): string {
-  if (typeof document === 'undefined') return 'unknown'
+export function registerComponent(componentData: {
+  name: string
+  constructor: new (...args: unknown[]) => unknown
+  conditions?: Array<{
+    type: 'custom' | 'feature'
+    config: unknown
+  }>
+  loadingStrategy?: {
+    type: 'lazy' | 'critical'
+  }
+}): void {
+  const decorators: DecoratorMetadata[] = []
 
-  // Try to get template from body class
-  const bodyClasses = document.body?.className || ''
-  const templateMatch = bodyClasses.match(/template-(\w+)/)
-  if (templateMatch) {
-    return templateMatch[1]
+  if (componentData.conditions) {
+    for (const condition of componentData.conditions) {
+      if (condition.type === 'custom' || condition.type === 'feature') {
+        decorators.push({
+          type: 'Template', // Map generic condition to Template for now
+          parameters: condition.config as TemplateDecoratorOptions
+        })
+      }
+    }
   }
 
-  // Fallback: try to get from meta tag
-  const metaTemplate = document.querySelector('meta[name="shopify-template"]')
-  if (metaTemplate) {
-    return metaTemplate.getAttribute('content') || 'unknown'
+  if (componentData.loadingStrategy?.type === 'lazy') {
+    decorators.push({
+      type: 'LazyLoad',
+      parameters: {}
+    })
   }
 
-  return 'unknown'
+  if (componentData.loadingStrategy?.type === 'critical') {
+    decorators.push({
+      type: 'Critical',
+      parameters: {}
+    })
+  }
+
+  const metadata: ComponentMetadata = {
+    className: componentData.name,
+    filePath: 'unknown',
+    decorators,
+    instance: new componentData.constructor()
+  }
+
+  registry.register(metadata)
 }

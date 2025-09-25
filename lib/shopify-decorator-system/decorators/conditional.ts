@@ -16,8 +16,8 @@ import type { DecoratorOptions, ConditionalConfig } from '../types.js'
 export function Conditional(
   condition: () => boolean,
   options: DecoratorOptions = {}
-): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+) {
+  return function <T extends { new (...args: any[]): {} }>(constructor: T): T {
     const conditionalConfig: ConditionalConfig = {
       custom: condition,
     }
@@ -44,8 +44,8 @@ export function Conditional(
 export function MediaQuery(
   mediaQuery: string,
   options: DecoratorOptions = {}
-): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+) {
+  return function <T extends { new (...args: any[]): {} }>(constructor: T): T {
     const conditionalConfig: ConditionalConfig = {
       media: mediaQuery,
     }
@@ -72,8 +72,8 @@ export function MediaQuery(
 export function FeatureDetection(
   feature: string,
   options: DecoratorOptions = {}
-): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+) {
+  return function <T extends { new (...args: any[]): {} }>(constructor: T): T {
     const conditionalConfig: ConditionalConfig = {
       feature,
     }
@@ -97,14 +97,14 @@ export function FeatureDetection(
 /**
  * Load only on touch devices
  */
-export function TouchOnly(options: DecoratorOptions = {}): ClassDecorator {
+export function TouchOnly(options: DecoratorOptions = {}) {
   return FeatureDetection('touchstart', options)
 }
 
 /**
  * Load only on desktop (non-touch)
  */
-export function DesktopOnly(options: DecoratorOptions = {}): ClassDecorator {
+export function DesktopOnly(options: DecoratorOptions = {}) {
   return Conditional(() => {
     return typeof window !== 'undefined' && !('ontouchstart' in window)
   }, options)
@@ -113,13 +113,13 @@ export function DesktopOnly(options: DecoratorOptions = {}): ClassDecorator {
 /**
  * Load only if viewport is above certain width
  */
-export function MinWidth(width: number, options: DecoratorOptions = {}): ClassDecorator {
+export function MinWidth(width: number, options: DecoratorOptions = {}) {
   return MediaQuery(`(min-width: ${width}px)`, options)
 }
 
 /**
  * Load only if viewport is below certain width
  */
-export function MaxWidth(width: number, options: DecoratorOptions = {}): ClassDecorator {
+export function MaxWidth(width: number, options: DecoratorOptions = {}) {
   return MediaQuery(`(max-width: ${width}px)`, options)
 }

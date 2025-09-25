@@ -5,8 +5,7 @@
  * TailwindCSS, and other performance optimization plugins.
  */
 
-import path from 'path'
-import directiveSplitter from './lib/postcss-shopify-directive-splitter/index.ts'
+import directiveSplitter from './lib/postcss-shopify-directive-splitter/index.js'
 import tailwindcss from '@tailwindcss/postcss'
 import autoprefixer from 'autoprefixer'
 import cssnano from 'cssnano'

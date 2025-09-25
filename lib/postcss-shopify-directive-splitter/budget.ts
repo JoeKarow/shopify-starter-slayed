@@ -5,7 +5,7 @@
  */
 
 import type { GeneratedFile, DirectiveSplitterOptions } from '../../specs/001-shopify-template-codesplitting/contracts/postcss-plugin'
-import { formatBytes } from './utils.ts'
+import { formatBytes } from './utils'
 
 export interface BudgetViolation {
   type: 'criticalCSS' | 'templateCSS' | 'totalCSS'

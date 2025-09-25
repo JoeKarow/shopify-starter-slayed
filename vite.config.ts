@@ -33,12 +33,12 @@ function removeFile(dest: string): void {
 }
 
 function copyPublicToAssetsPlugin() {
-  let config: any
+  let config: { root: string }
 
   return {
     name: 'vite-plugin-copy-public',
     apply: 'serve' as const, // Only apply this during development
-    configResolved(resolvedConfig: any) {
+    configResolved(resolvedConfig: { root: string }) {
       config = resolvedConfig
     },
     buildStart() {
@@ -75,7 +75,7 @@ export default defineConfig({
   clearScreen: false,
   server: {
     host: '127.0.0.1',
-    https: true,
+    https: {},
     port: 3000,
     hmr: true
   },
@@ -202,6 +202,7 @@ export default defineConfig({
           // Filter out the liquid module to prevent a full refresh
           return [...ctx.modules[0]?.importers ?? [], ...ctx.modules.slice(1)]
         }
+        return undefined
       }
     }
   ],

@@ -5,6 +5,10 @@
     "frontend/**/*",
     "src/**/*"
   ],
+  "typeRoots": [
+    "node_modules/@types",
+    "lib/shopify-decorator-system/types"
+  ],
   "exclude": [
     "dist",
     "build",
@@ -17,7 +21,7 @@
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
 
     // Experimental Decorators Support (Stage 2)
     "experimentalDecorators": true,
@@ -58,7 +62,6 @@
     "noEmit": true,
 
     // Interop Constraints
-    "allowImportingTsExtensions": false,
     "resolveJsonModule": true,
     "allowJs": true,
     "checkJs": false

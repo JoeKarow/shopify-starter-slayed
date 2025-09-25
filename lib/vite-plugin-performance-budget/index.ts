@@ -117,11 +117,11 @@ export default function performanceBudgetPlugin(
     configResolved(resolvedConfig) {
       config = resolvedConfig
     },
-    async generateBundle(outputOptions, bundle) {
+    async generateBundle(_outputOptions, bundle) {
       if (config.command !== 'build') return
 
       const assets = analyzeBundle(bundle)
-      const violations = checkBudgets(assets, opts)
+      const violations = checkBudgets(assets, opts as Required<PerformanceBudgetOptions>)
       const buildTime = Date.now() - startTime
 
       const report: BudgetReport = {
@@ -219,39 +219,39 @@ function checkBudgets(assets: AssetSize[], options: Required<PerformanceBudgetOp
 
   // Critical CSS budget
   const criticalSize = criticalCSS.reduce((sum, a) => sum + a.size, 0)
-  if (criticalSize > options.css.critical) {
+  if (criticalSize > options.css.critical!) {
     violations.push({
       type: 'css',
       category: 'critical',
       actual: criticalSize,
-      budget: options.css.critical,
-      excess: criticalSize - options.css.critical,
+      budget: options.css.critical!,
+      excess: criticalSize - options.css.critical!,
       severity: 'error',
     })
   }
 
   // Template CSS budgets
   for (const asset of templateCSS) {
-    if (asset.size > options.css.template) {
+    if (asset.size > options.css.template!) {
       violations.push({
         type: 'css',
         category: `template:${asset.name}`,
         actual: asset.size,
-        budget: options.css.template,
-        excess: asset.size - options.css.template,
+        budget: options.css.template!,
+        excess: asset.size - options.css.template!,
         severity: 'warning',
       })
     }
   }
 
   // Total CSS budget
-  if (totalCSS > options.css.total) {
+  if (totalCSS > options.css.total!) {
     violations.push({
       type: 'css',
       category: 'total',
       actual: totalCSS,
-      budget: options.css.total,
-      excess: totalCSS - options.css.total,
+      budget: options.css.total!,
+      excess: totalCSS - options.css.total!,
       severity: 'error',
     })
   }
@@ -264,13 +264,13 @@ function checkBudgets(assets: AssetSize[], options: Required<PerformanceBudgetOp
 
   // Main JS budget
   for (const asset of mainJS) {
-    if (asset.size > options.js.main) {
+    if (asset.size > options.js.main!) {
       violations.push({
         type: 'js',
         category: `main:${asset.name}`,
         actual: asset.size,
-        budget: options.js.main,
-        excess: asset.size - options.js.main,
+        budget: options.js.main!,
+        excess: asset.size - options.js.main!,
         severity: 'warning',
       })
     }
@@ -278,26 +278,26 @@ function checkBudgets(assets: AssetSize[], options: Required<PerformanceBudgetOp
 
   // Chunk JS budgets
   for (const asset of chunkJS) {
-    if (asset.size > options.js.chunk) {
+    if (asset.size > options.js.chunk!) {
       violations.push({
         type: 'js',
         category: `chunk:${asset.name}`,
         actual: asset.size,
-        budget: options.js.chunk,
-        excess: asset.size - options.js.chunk,
+        budget: options.js.chunk!,
+        excess: asset.size - options.js.chunk!,
         severity: 'warning',
       })
     }
   }
 
   // Total JS budget
-  if (totalJS > options.js.total) {
+  if (totalJS > options.js.total!) {
     violations.push({
       type: 'js',
       category: 'total',
       actual: totalJS,
-      budget: options.js.total,
-      excess: totalJS - options.js.total,
+      budget: options.js.total!,
+      excess: totalJS - options.js.total!,
       severity: 'error',
     })
   }
@@ -439,10 +439,31 @@ function generateHTMLReport(report: BudgetReport): string {
  * Merge options with defaults
  */
 function mergeOptions(defaults: Required<PerformanceBudgetOptions>, options: PerformanceBudgetOptions): Required<PerformanceBudgetOptions> {
+  const css = options.css || {}
+  const js = options.js || {}
+  const assets = options.assets || {}
+  const behavior = options.behavior || {}
+
   return {
-    css: { ...defaults.css, ...options.css },
-    js: { ...defaults.js, ...options.js },
-    assets: { ...defaults.assets, ...options.assets },
-    behavior: { ...defaults.behavior, ...options.behavior },
+    css: {
+      critical: css.critical ?? defaults.css.critical,
+      template: css.template ?? defaults.css.template,
+      total: css.total ?? defaults.css.total,
+    },
+    js: {
+      main: js.main ?? defaults.js.main,
+      chunk: js.chunk ?? defaults.js.chunk,
+      total: js.total ?? defaults.js.total,
+    },
+    assets: {
+      individual: assets.individual ?? defaults.assets.individual,
+      total: assets.total ?? defaults.assets.total,
+    },
+    behavior: {
+      failOnExceeded: behavior.failOnExceeded ?? defaults.behavior.failOnExceeded,
+      warn: behavior.warn ?? defaults.behavior.warn,
+      report: behavior.report ?? defaults.behavior.report,
+      reportDir: behavior.reportDir ?? defaults.behavior.reportDir,
+    },
   }
 }

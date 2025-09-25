@@ -12,8 +12,8 @@ import { ComponentRegistry } from '../registry.js'
  * Critical decorator - marks component as critical path
  * Cannot be used with @LazyLoad
  */
-export function Critical(): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+export function Critical() {
+  return function <T extends { new (...args: any[]): {} }>(constructor: T): T {
     const registry = ComponentRegistry.getInstance()
 
     // Check for conflicting @LazyLoad decorator

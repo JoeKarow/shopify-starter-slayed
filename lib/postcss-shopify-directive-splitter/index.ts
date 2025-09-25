@@ -15,10 +15,10 @@ import type {
   ProcessingResult
 } from '../../specs/001-shopify-template-codesplitting/contracts/postcss-plugin'
 
-import { processDirective } from './parser.ts'
-import { generateFiles, createLiquidSnippet, writeGeneratedFiles } from './generator.ts'
-import { checkBudget, generateBudgetReport, shouldFailBuild } from './budget.ts'
-import { validateDirectives } from './validator.ts'
+import { processDirective } from './parser'
+import { generateFiles, createLiquidSnippet, writeGeneratedFiles } from './generator'
+import { checkBudget, generateBudgetReport, shouldFailBuild } from './budget'
+import { validateDirectives } from './validator'
 
 /**
  * Main PostCSS plugin factory
@@ -91,10 +91,10 @@ async function processCSS(root: Root, options: DirectiveSplitterOptions): Promis
 
   // Validate directives
   const validationResults = validateDirectives(directives)
-  const validationErrors = validationResults.filter(v => v.type === 'error')
+  const validationErrors = validationResults.filter((v: any) => v.type === 'error')
 
   if (validationErrors.length > 0) {
-    errors.push(...validationErrors.map(v => ({
+    errors.push(...validationErrors.map((v: any) => ({
       message: v.message,
       line: v.directive?.lineNumber,
       directive: v.directive?.type
@@ -108,11 +108,11 @@ async function processCSS(root: Root, options: DirectiveSplitterOptions): Promis
   const budgetResult = checkBudget(files, options)
 
   // Calculate metrics
-  const totalSize = files.reduce((sum, f) => sum + f.size, 0)
+  const totalSize = files.reduce((sum: number, f: GeneratedFile) => sum + f.size, 0)
 
   return {
     files,
-    manifest: files.reduce((acc, file) => {
+    manifest: files.reduce((acc: Record<string, string>, file: GeneratedFile) => {
       const key = file.template ? `${file.template}-${file.type}` : file.type
       acc[key] = file.path
       return acc
@@ -170,7 +170,7 @@ const api: DirectiveSplitterAPI = Object.assign(directiveSplitter, {
     const result = checkBudget(files, options)
     return {
       status: result.status,
-      violations: result.violations.map(v => ({
+      violations: result.violations.map((v: any) => ({
         type: v.type,
         actual: v.actual,
         budget: v.budget,
@@ -191,11 +191,11 @@ export type {
   ProcessingResult
 } from '../../specs/001-shopify-template-codesplitting/contracts/postcss-plugin'
 
-export { processDirective } from './parser.ts'
-export { generateFiles, createLiquidSnippet } from './generator.ts'
-export { checkBudget } from './budget.ts'
-export { validateDirectives } from './validator.ts'
+export { processDirective } from './parser'
+export { generateFiles, createLiquidSnippet } from './generator'
+export { checkBudget } from './budget'
+export { validateDirectives } from './validator'
 
 // Legacy exports for backward compatibility
-export { parseDirectives } from './parser.ts'
-export type { DirectiveNode, SplitResult } from './parser.ts'
+export { parseDirectives } from './parser'
+export type { DirectiveNode, SplitResult } from './parser'

@@ -18,8 +18,8 @@ export interface TemplateDecoratorOptions {
  */
 export function Template(
   options: string[] | TemplateDecoratorOptions
-): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+) {
+  return function <T extends { new (...args: any[]): {} }>(constructor: T): T {
     const registry = ComponentRegistry.getInstance()
 
     // Handle both array and object parameter formats
@@ -78,8 +78,8 @@ function getComponentFilePath(constructor: any): string {
  */
 export function ExcludeTemplate(
   templates: string | string[]
-): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+) {
+  return function <T extends { new (...args: any[]): {} }>(constructor: T): T {
     const excludeNames = Array.isArray(templates) ? templates : [templates]
 
     // Get all possible Shopify template names, exclude specified ones
@@ -91,13 +91,13 @@ export function ExcludeTemplate(
 
     const includeTemplates = allTemplates.filter(t => !excludeNames.includes(t))
 
-    return Template(includeTemplates)(constructor)
+    return Template(includeTemplates)(constructor) as T
   }
 }
 
 /**
  * Load on all templates (global component)
  */
-export function GlobalTemplate(): ClassDecorator {
+export function GlobalTemplate() {
   return Template(['*'])
 }

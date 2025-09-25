@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import { AtRule, Root } from 'postcss'
+import { AtRule } from 'postcss'
 import type { DirectiveSplitterAPI, DirectiveSplitterOptions, ProcessedDirective } from '../../specs/001-shopify-template-codesplitting/contracts/postcss-plugin'
 
 // Mock AtRule creation helper
@@ -161,7 +161,7 @@ describe('PostCSS Plugin: processDirective Contract (T009)', () => {
         sourceFile: expect.any(String),
         lineNumber: expect.any(Number),
         options: {
-          priority: 'high'
+          priority: 10
         }
       })
     })

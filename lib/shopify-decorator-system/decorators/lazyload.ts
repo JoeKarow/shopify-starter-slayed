@@ -17,8 +17,8 @@ export interface LazyLoadDecoratorOptions {
  * LazyLoad decorator - enables viewport-based lazy loading
  * Cannot be used with @Critical decorator
  */
-export function LazyLoad(options: LazyLoadDecoratorOptions = {}): ClassDecorator {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+export function LazyLoad(options: LazyLoadDecoratorOptions = {}) {
+  return function <T extends { new (...args: any[]): {} }>(constructor: T): T {
     const registry = ComponentRegistry.getInstance()
 
     // Check for conflicting @Critical decorator

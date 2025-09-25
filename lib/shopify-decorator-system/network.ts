@@ -156,7 +156,7 @@ export class NetworkManager {
     // Listen for connection changes (if supported)
     const connection = this.getConnection()
     if (connection && 'addEventListener' in connection) {
-      connection.addEventListener('change', this.handleConnectionChange)
+      (connection as any).addEventListener('change', this.handleConnectionChange)
     }
   }
 
@@ -173,7 +173,7 @@ export class NetworkManager {
 
     const connection = this.getConnection()
     if (connection && 'removeEventListener' in connection) {
-      connection.removeEventListener('change', this.handleConnectionChange)
+      (connection as any).removeEventListener('change', this.handleConnectionChange)
     }
   }
 
